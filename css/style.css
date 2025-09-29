@@ -1,0 +1,441 @@
+.navbar-brand { font-weight: 600; }
+.table-responsive { margin-top: 1rem; }
+.badge { font-size: 0.75em; }
+.tab-pane { padding: 1rem 0; }
+.action-buttons { white-space: nowrap; }
+.table th { font-weight: 600; }
+.fixed-notifications {
+	position: fixed;
+	top: 80px;
+	right: 20px;
+	z-index: 1050;
+	width: 350px;
+}
+body { padding-top: 70px; }
+
+
+.modal-backdrop {
+	z-index: 1040;
+}
+
+.modal {
+	z-index: 1050;
+}
+
+/* ===== MEJORAS PARA MODALES Y FORMULARIOS ===== */
+
+/* Modal mejorado */
+.modal-content {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+}
+
+.modal-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-bottom: none;
+    padding: 1.5rem 2rem;
+}
+
+.modal-title {
+    font-weight: 600;
+    font-size: 1.25rem;
+}
+
+.modal-body {
+    padding: 2rem;
+    background: #f8f9fa;
+}
+
+.modal-footer {
+    border-top: 1px solid #e9ecef;
+    padding: 1.5rem 2rem;
+    background: white;
+}
+
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-color: #667eea;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+    border-color: #5a6fd8;
+    transform: translateY(-2px);
+}
+
+.btn-outline-secondary {
+    border-color: #6c757d;
+    color: #6c757d;
+}
+
+.btn-outline-secondary:hover {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    color: white;
+}
+
+/* Formularios mejorados */
+.form-label {
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 0.75rem;
+    font-size: 0.95rem;
+}
+
+.form-control, .form-select {
+    border-radius: 8px;
+    border: 2px solid #e2e8f0;
+    padding: 0.75rem 1rem;
+    transition: all 0.3s ease;
+    font-size: 0.95rem;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    transform: translateY(-1px);
+}
+
+.form-check-input:checked {
+    background-color: #667eea;
+    border-color: #667eea;
+}
+
+
+
+.form-check-label {
+    font-weight: 500;
+    color: #4a5568;
+}
+
+/* Select múltiple mejorado */
+.form-select[multiple] {
+    min-height: 120px;
+}
+
+/* Grupos de formulario */
+.mb-3 {
+    margin-bottom: 1.5rem !important;
+}
+
+/* Estados de validación */
+.is-valid {
+    border-color: #48bb78 !important;
+}
+
+.is-invalid {
+    border-color: #f56565 !important;
+}
+
+.invalid-feedback {
+    font-size: 0.875rem;
+    color: #f56565;
+    margin-top: 0.5rem;
+    font-weight: 500;
+}
+
+/* Loading states para botones */
+.btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+.btn-loading {
+    position: relative;
+    color: transparent !important;
+}
+
+.btn-loading::after {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    top: 50%;
+    left: 50%;
+    margin-left: -8px;
+    margin-top: -8px;
+    border: 2px solid transparent;
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Mejoras específicas para tipos de campo */
+input[type="number"] {
+    text-align: right;
+}
+
+textarea.form-control {
+    min-height: 100px;
+    resize: vertical;
+}
+
+/* Tooltips en formularios */
+.form-text {
+    font-size: 0.875rem;
+    color: #718096;
+}
+
+/* Campos requeridos con asterisco rojo */
+.form-label.required::after {
+    content: " *";
+    color: #f56565;
+}
+
+/* ===== ESTRUCTURA MEJORADA ===== */
+
+/* Breadcrumb mejorado */
+.breadcrumb {
+    background: transparent;
+    padding: 0.5rem 0;
+    margin-bottom: 1rem;
+}
+
+.breadcrumb-item a {
+    text-decoration: none;
+    color: #6c757d;
+}
+
+.breadcrumb-item.active {
+    color: #495057;
+    font-weight: 500;
+}
+
+/* Cards mejoradas */
+.card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.12);
+}
+
+.card-header {
+    border-radius: 12px 12px 0 0 !important;
+    padding: 1.5rem 2rem;
+}
+
+/* Pestañas verticales */
+.nav-pills.vertical .nav-link {
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+    padding: 1rem 1.25rem;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.nav-pills.vertical .nav-link:hover {
+    background-color: #e9ecef;
+    transform: translateX(5px);
+}
+
+.nav-pills.vertical .nav-link.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    transform: translateX(5px);
+}
+
+/* Pestañas horizontales responsive */
+.nav-pills.nav-fill .nav-link {
+    border-radius: 8px;
+    margin: 0.25rem;
+    padding: 0.75rem 1rem;
+    font-weight: 500;
+}
+
+/* Sidebar de módulos */
+.bg-light {
+    background-color: #f8f9fa !important;
+}
+
+.border-end {
+    border-right: 1px solid #e9ecef !important;
+}
+
+/* Tablas responsive mejoradas */
+.table-responsive {
+    border-radius: 0 0 12px 12px;
+}
+
+.table {
+    margin-bottom: 0;
+}
+
+.table thead th {
+    border-bottom: 2px solid #e9ecef;
+    font-weight: 600;
+    color: #495057;
+    background-color: #f8f9fa;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+/* Botones de acción en tablas */
+.btn-group-sm > .btn {
+    border-radius: 6px;
+    padding: 0.375rem 0.75rem;
+}
+
+/* Badges para estadísticas */
+.badge {
+    font-size: 0.7em;
+    font-weight: 500;
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+    .container-fluid {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    
+    .card-header {
+        padding: 1rem 1.25rem;
+    }
+    
+    .nav-pills.nav-fill .nav-link {
+        font-size: 0.875rem;
+        padding: 0.5rem 0.75rem;
+    }
+    
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+    
+    .btn-group-sm > .btn {
+        padding: 0.25rem 0.5rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .breadcrumb {
+        font-size: 0.875rem;
+    }
+    
+    .card-title {
+        font-size: 1.1rem;
+    }
+    
+    .d-flex.gap-2 {
+        gap: 0.5rem !important;
+    }
+}
+
+/* Animaciones suaves */
+.tab-pane {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Scroll personalizado */
+.table-responsive::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* ===== ESTRUCTURA SIMPLIFICADA ===== */
+
+/* Espaciado general */
+.container-fluid {
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+/* Sidebar mejorado */
+.list-group-item {
+    border: none;
+    border-radius: 0 !important;
+    padding: 1rem 1.25rem;
+    transition: all 0.3s ease;
+    border-left: 3px solid transparent;
+}
+
+.list-group-item:hover {
+    background-color: #f8f9fa;
+    border-left-color: #dee2e6;
+}
+
+.list-group-item.active {
+    background-color: #e7f1ff;
+    border-left-color: #0d6efd;
+    color: #0d6efd;
+    font-weight: 600;
+}
+
+.list-group-item.active .text-muted {
+    color: #6c757d !important;
+}
+
+/* Cards mejoradas */
+.card {
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+.card-header {
+    border-radius: 8px 8px 0 0 !important;
+    font-weight: 600;
+}
+
+/* Tablas con encabezados oscuros */
+.table-dark {
+    background-color: #2d3748 !important;
+}
+
+.table-dark th {
+    border-bottom: none;
+    font-weight: 600;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .col-md-3 {
+        margin-bottom: 1rem;
+    }
+    
+    .list-group-item {
+        padding: 0.75rem 1rem;
+    }
+}
+
+/* Botones de acción */
+.btn-group-sm > .btn {
+    border-radius: 4px;
+}
