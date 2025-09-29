@@ -21,43 +21,39 @@ class GeneradorHTML {
 	// ===== GENERADORES DE ESTRUCTURA PRINCIPAL =====
 
 // Navbar mejorado con menú responsive Y menú de usuario
-generarNavbar() {
-    const branding = this.config.branding;
-    const navegacion = this.config.navegacion;
+// Navbar mejorado con menú responsive
+	generarNavbar() {
+		const branding = this.config.branding;
+		const navegacion = this.config.navegacion;
 
-    return `
-        <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top shadow-sm">
-            <div class="container-fluid">
-                <a class="navbar-brand fw-bold" href="#">
-                    <i class="${branding.logo} me-2"></i>
-                    ${branding.nombre}
-                </a>
-                
-                <!-- Botón para toggle sidebar en móvil -->
-                <button class="navbar-toggler" type="button" onclick="toggleSidebar()">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                
-                <div class="collapse navbar-collapse">
-                    <!-- Menú de navegación principal -->
-                    <ul class="navbar-nav me-auto">
-                        ${navegacion.menuPrincipal.map(item => `
-                            <li class="nav-item">
-                                <a class="nav-link" href="${item.url}">
-                                    <i class="${item.icono}"></i>
-                                    ${item.nombre}
-                                </a>
-                            </li>
-                        `).join('')}
-                    </ul>
-                    
-                    <!-- Menú de usuario -->
-                    ${this.generarMenuUsuario()}
-                </div>
-            </div>
-        </nav>
-    `;
-}
+		return `
+			<nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top shadow-sm">
+				<div class="container-fluid">
+					<a class="navbar-brand fw-bold" href="#">
+						<i class="${branding.logo} me-2"></i>
+						${branding.nombre}
+					</a>
+					
+					<button class="navbar-toggler d-lg-none" type="button" onclick="toggleSidebar()">
+						<span class="navbar-toggler-icon"></span>
+					</button>
+					
+					<div class="collapse navbar-collapse">
+						<ul class="navbar-nav ms-auto">
+							${navegacion.menuPrincipal.map(item => `
+								<li class="nav-item">
+									<a class="nav-link" href="${item.url}">
+										<i class="${item.icono}"></i>
+										${item.nombre}
+									</a>
+								</li>
+							`).join('')}
+						</ul>
+					</div>
+				</div>
+			</nav>
+		`;
+	}
 
 // Generar menú de usuario (corregido)
 generarMenuUsuario() {
