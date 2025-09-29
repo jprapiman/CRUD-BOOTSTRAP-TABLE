@@ -1,4 +1,5 @@
 // configuracion-completa.js - Configuración unificada de todo el sistema
+// configuracion-completa.js - Configuración unificada de todo el sistema
 
 const CONFIGURACION_SISTEMA = {
     // ===== CONFIGURACIÓN GENERAL =====
@@ -129,34 +130,35 @@ const CONFIGURACION_SISTEMA = {
 
     // ===== CONFIGURACIÓN DE MODAL =====
     modal: {
-		tamaño: "modal-lg",
-		animacion: "fade",
-		backdrop: true,
-		keyboard: true,
-		centrado: true, // Cambiar a true para centrar verticalmente
-		botones: {
-			cancelar: { 
-				texto: "Cancelar", 
-				clase: "btn-outline-secondary", 
-				icono: "fas fa-times" 
-			},
-			guardar: { 
-				texto: "Guardar", 
-				clase: "btn-primary", 
-				icono: "fas fa-save" 
-			},
-			actualizar: { 
-				texto: "Actualizar", 
-				clase: "btn-primary", 
-				icono: "fas fa-save" 
-			}
-		},
-		configuracion: {
-			mostrarIconoTitulo: true,
-			cerrarConEscape: true,
-			cerrarConClick: false
-		}
-	},
+        tamaño: "modal-lg",
+        animacion: "fade",
+        backdrop: true,
+        keyboard: true,
+        centrado: true,
+        botones: {
+            cancelar: { 
+                texto: "Cancelar", 
+                clase: "btn-outline-secondary", 
+                icono: "fas fa-times" 
+            },
+            guardar: { 
+                texto: "Guardar", 
+                clase: "btn-primary", 
+                icono: "fas fa-save" 
+            },
+            actualizar: { 
+                texto: "Actualizar", 
+                clase: "btn-primary", 
+                icono: "fas fa-save" 
+            }
+        },
+        configuracion: {
+            mostrarIconoTitulo: true,
+            cerrarConEscape: true,
+            cerrarConClick: false
+        }
+    },
+
     // ===== CONFIGURACIÓN DE TABLAS =====
     tablas: {
         configuracionGlobal: {
@@ -336,6 +338,8 @@ const CONFIGURACION_SISTEMA = {
             icono: 'fas fa-tags',
             genero: 'femenino',
             descripcion: 'Gestión de categorías de productos',
+            tabId: 'categorias',
+            tableId: 'tablaCategorias',
             
             columnasFormulario: [
                 { name: 'nombre', label: 'Nombre', type: 'text', required: true, placeholder: 'Nombre de la categoría' },
@@ -361,6 +365,8 @@ const CONFIGURACION_SISTEMA = {
             icono: 'fas fa-box',
             genero: 'masculino',
             descripcion: 'Gestión de productos del inventario',
+            tabId: 'productos',
+            tableId: 'tablaProductos',
             
             columnasFormulario: [
                 { name: 'sku', label: 'SKU', type: 'text', required: true, placeholder: 'Código único del producto' },
@@ -395,6 +401,8 @@ const CONFIGURACION_SISTEMA = {
             icono: 'fas fa-users',
             genero: 'común',
             descripcion: 'Gestión de usuarios del sistema',
+            tabId: 'usuarios',
+            tableId: 'tablaUsuarios',
             
             columnasFormulario: [
                 { name: 'username', label: 'Usuario', type: 'text', required: true, placeholder: 'Nombre de usuario' },
@@ -432,6 +440,8 @@ const CONFIGURACION_SISTEMA = {
             icono: 'fas fa-truck',
             genero: 'masculino',
             descripcion: 'Gestión de proveedores',
+            tabId: 'proveedores',
+            tableId: 'tablaProveedores',
             
             columnasFormulario: [
                 { name: 'nombre', label: 'Nombre', type: 'text', required: true, placeholder: 'Nombre del proveedor' },
@@ -461,6 +471,8 @@ const CONFIGURACION_SISTEMA = {
             icono: 'fas fa-warehouse',
             genero: 'femenino',
             descripcion: 'Gestión de bodegas de almacenamiento',
+            tabId: 'bodegas',
+            tableId: 'tablaBodegas',
             
             columnasFormulario: [
                 { name: 'nombre', label: 'Nombre', type: 'text', required: true, placeholder: 'Nombre de la bodega' },
@@ -488,6 +500,8 @@ const CONFIGURACION_SISTEMA = {
             icono: 'fas fa-cash-register',
             genero: 'femenino',
             descripcion: 'Gestión de cajas registradoras',
+            tabId: 'cajas',
+            tableId: 'tablaCajas',
             
             columnasFormulario: [
                 { name: 'nombre', label: 'Nombre', type: 'text', required: true, placeholder: 'Nombre de la caja' },
@@ -513,6 +527,8 @@ const CONFIGURACION_SISTEMA = {
             icono: 'fas fa-list',
             genero: 'masculino',
             descripcion: 'Gestión de estados del sistema',
+            tabId: 'estados',
+            tableId: 'tablaEstados',
             
             columnasFormulario: [
                 { name: 'modulo', label: 'Módulo', type: 'select', required: true, options: [
@@ -546,6 +562,8 @@ const CONFIGURACION_SISTEMA = {
             icono: 'fas fa-file-invoice',
             genero: 'masculino',
             descripcion: 'Gestión de tipos de documentos',
+            tabId: 'tipos-documento',
+            tableId: 'tablaTiposDocumento',
             
             columnasFormulario: [
                 { name: 'codigo', label: 'Código', type: 'text', required: true, placeholder: 'Código único' },
@@ -576,6 +594,8 @@ const CONFIGURACION_SISTEMA = {
             icono: 'fas fa-percentage',
             genero: 'masculino',
             descripcion: 'Gestión de tipos de promociones',
+            tabId: 'tipos-promocion',
+            tableId: 'tablaTiposPromocion',
             
             columnasFormulario: [
                 { name: 'codigo', label: 'Código', type: 'text', required: true, placeholder: 'Código único' },
@@ -591,7 +611,8 @@ const CONFIGURACION_SISTEMA = {
                 { field: 'nombre', title: 'Nombre', sortable: true, width: 150 },
                 { field: 'descripcion', title: 'Descripción' },
                 { field: 'formula', title: 'Fórmula' },
-                { field: 'activo', title: 'Estado', width: 100, align: 'center' },{ field: 'operate', title: 'Acciones', width: 120, align: 'center' }
+                { field: 'activo', title: 'Estado', width: 100, align: 'center' },
+                { field: 'operate', title: 'Acciones', width: 120, align: 'center' }
             ]
         },
 
@@ -601,6 +622,8 @@ const CONFIGURACION_SISTEMA = {
             icono: 'fas fa-credit-card',
             genero: 'masculino',
             descripcion: 'Gestión de métodos de pago',
+            tabId: 'metodos-pago',
+            tableId: 'tablaMetodosPago',
             
             columnasFormulario: [
                 { name: 'codigo', label: 'Código', type: 'text', required: true, placeholder: 'Código único' },
@@ -623,51 +646,21 @@ const CONFIGURACION_SISTEMA = {
             ]
         }
     },
-	
-	// En CONFIGURACION_SISTEMA, agrega esta sección después de 'modulos':
-	mapeos: {
-		// Mapeo de módulos a IDs de pestañas (completo pero opcional)
-		moduloToTabId: {
-			'categorias': 'categorias',
-			'productos': 'productos', 
-			'usuarios': 'usuarios',
-			'proveedores': 'proveedores',
-			'bodegas': 'bodegas',
-			'cajas': 'cajas',
-			'estados': 'estados',
-			'tipos_documento': 'tipos-documento',
-			'tipos_promocion': 'tipos-promocion',
-			'metodos_pago': 'metodos-pago'
-		},
-		
-		// Mapeo de módulos a IDs de tabla (completo pero opcional)
-		moduloToTableId: {
-			'categorias': 'tablaCategorias',
-			'productos': 'tablaProductos',
-			'usuarios': 'tablaUsuarios', 
-			'proveedores': 'tablaProveedores',
-			'bodegas': 'tablaBodegas',
-			'cajas': 'tablaCajas',
-			'estados': 'tablaEstados',
-			'tipos_documento': 'tablaTiposDocumento',
-			'tipos_promocion': 'tablaTiposPromocion',
-			'metodos_pago': 'tablaMetodosPago'
-		},
-		
-		// Orden de aparición de pestañas
-		ordenPestanas: [
-			'productos',
-			'categorias', 
-			'usuarios',
-			'proveedores',
-			'bodegas',
-			'cajas',
-			'estados',
-			'tipos_documento',
-			'tipos_promocion',
-			'metodos_pago'
-		]
-	},
+
+    // ===== ORDEN DE MÓDULOS =====
+    ordenModulos: [
+        'productos',
+        'categorias', 
+        'usuarios',
+        'proveedores',
+        'bodegas',
+        'cajas',
+        'estados',
+        'tipos_documento',
+        'tipos_promocion',
+        'metodos_pago'
+    ],
+
 
     // ===== CONFIGURACIÓN DE LA API =====
     api: {

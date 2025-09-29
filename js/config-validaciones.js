@@ -1,32 +1,29 @@
-// config-validaciones.js - Validaciones usando configuración central
+// config-validaciones.js - Validaciones usando configuración por módulo
 class ConfigValidaciones {
-    static validarMapeosCompletos() {
+    static validarConfiguracionCompleta() {
         if (!window.configManager) {
             throw new Error('ConfigManager no disponible');
         }
         
-        const config = window.configManager.config;
         const advertencias = [];
         const errores = [];
         
-        // Validar que todos los módulos tengan mapeos
-        const modulos = Object.keys(config.modulos);
+        // Validar cada módulo individualmente
+        const modulos = window.configManager.getModulosConfigurados();
         
         modulos.forEach(modulo => {
-            // Obtener tabId - puede ser configurado o por defecto
-            const tabId = this.obtenerTabIdConfigurado(modulo);
-            if (!tabId) {
-                advertencias.push(`Módulo ${modulo} usando tabId por defecto: ${modulo}`);
+            const moduloConfig = window.configManager.getModuloConfig(modulo);
+            
+            // Validar propiedades básicas
+            if (!moduloConfig.tabId) {
+                advertencias.push(`Módulo ${modulo} no tiene tabId, usando: ${modulo.replace(/_/g, '-')}`);
             }
             
-            // Obtener tableId - puede ser configurado o por defecto
-            const tableId = this.obtenerTableIdConfigurado(modulo);
-            if (!tableId) {
-                advertencias.push(`Módulo ${modulo} usando tableId por defecto: tabla${this.capitalize(modulo)}`);
+            if (!moduloConfig.tableId) {
+                advertencias.push(`Módulo ${modulo} no tiene tableId, usando: tabla${this.capitalize(modulo)}`);
             }
             
-            // Verificar que el módulo tenga configuración completa (más importante)
-            const moduloConfig = config.modulos[modulo];
+            // Validar configuración crítica
             if (!moduloConfig.columnasFormulario || moduloConfig.columnasFormulario.length === 0) {
                 errores.push(`Módulo ${modulo} no tiene columnasFormulario configuradas`);
             }
@@ -34,10 +31,23 @@ class ConfigValidaciones {
             if (!moduloConfig.columnasTablas || moduloConfig.columnasTablas.length === 0) {
                 errores.push(`Módulo ${modulo} no tiene columnasTablas configuradas`);
             }
+            
+            if (!moduloConfig.singular) {
+                errores.push(`Módulo ${modulo} no tiene nombre singular configurado`);
+            }
+            
+            if (!moduloConfig.plural) {
+                errores.push(`Módulo ${modulo} no tiene nombre plural configurado`);
+            }
         });
         
+        // Validar orden de módulos
+        if (!window.configManager.config.ordenModulos) {
+            advertencias.push('No hay orden de módulos configurado, usando orden alfabético');
+        }
+        
         if (advertencias.length > 0) {
-            console.warn('⚠️ Advertencias de mapeos:', advertencias);
+            console.warn('⚠️ Advertencias de configuración:', advertencias);
         }
         
         if (errores.length > 0) {
@@ -45,51 +55,24 @@ class ConfigValidaciones {
             return false;
         }
         
-        console.log('✅ Configuración validada correctamente');
+        console.log('✅ Configuración de módulos validada correctamente');
         return true;
     }
     
-    static obtenerTabIdConfigurado(modulo) {
-        if (!window.configManager) return modulo; // Fallback básico
-        
-        // Buscar en configuración explícita
-        const tabIdConfigurado = window.configManager.config.mapeos?.moduloToTabId?.[modulo];
-        if (tabIdConfigurado) {
-            return tabIdConfigurado;
-        }
-        
-        // Para módulos sin guiones, usar el mismo nombre
-        if (!modulo.includes('_')) {
-            return modulo;
-        }
-        
-        // Para módulos con guiones, generar uno por defecto
-        return modulo.replace(/_/g, '-');
-    }
-    
-    static obtenerTableIdConfigurado(modulo) {
-        if (!window.configManager) return `tabla${this.capitalize(modulo)}`;
-        
-        // Buscar en configuración explícita
-        const tableIdConfigurado = window.configManager.config.mapeos?.moduloToTableId?.[modulo];
-        if (tableIdConfigurado) {
-            return tableIdConfigurado;
-        }
-        
-        // Generar tableId por defecto
-        return `tabla${this.capitalize(modulo)}`;
-    }
-    
     static obtenerTabId(modulo) {
-        const tabId = this.obtenerTabIdConfigurado(modulo);
-        console.log(`🔗 TabId para ${modulo}: ${tabId}`);
-        return tabId;
+        if (!window.configManager) {
+            return modulo.replace(/_/g, '-');
+        }
+        
+        return window.configManager.getTabIdPorModulo(modulo);
     }
     
     static obtenerTableId(modulo) {
-        const tableId = this.obtenerTableIdConfigurado(modulo);
-        console.log(`🔗 TableId para ${modulo}: ${tableId}`);
-        return tableId;
+        if (!window.configManager) {
+            return `tabla${this.capitalize(modulo)}`;
+        }
+        
+        return window.configManager.getTableIdPorModulo(modulo);
     }
     
     static capitalize(str) {
@@ -98,23 +81,53 @@ class ConfigValidaciones {
         ).join('');
     }
     
-    // Método para debug de todos los mapeos
-    static debugMapeos() {
+    // Método para debug de configuración de módulos
+    static debugConfiguracionModulos() {
         if (!window.configManager) {
             console.error('ConfigManager no disponible');
             return;
         }
         
-        const modulos = Object.keys(window.configManager.config.modulos);
-        console.group('🔍 DEBUG - Mapeos de módulos');
+        const modulos = window.configManager.getOrdenModulos();
+        console.group('🔍 DEBUG - Configuración de Módulos');
         
         modulos.forEach(modulo => {
-            const tabId = this.obtenerTabIdConfigurado(modulo);
-            const tableId = this.obtenerTableIdConfigurado(modulo);
-            console.log(`${modulo}: tabId="${tabId}", tableId="${tableId}"`);
+            const config = window.configManager.getModuloConfig(modulo);
+            const completo = window.configManager.tieneConfiguracionCompleta(modulo);
+            
+            console.log(
+                `${modulo}:`, 
+                `tabId="${config.tabId}"`, 
+                `tableId="${config.tableId}"`,
+                `✅ ${completo ? 'COMPLETO' : 'INCOMPLETO'}`
+            );
         });
         
         console.groupEnd();
+    }
+    
+    // Validar que no hay tabIds duplicados
+    static validarTabIdsUnicos() {
+        if (!window.configManager) return true;
+        
+        const modulos = window.configManager.getModulosConfigurados();
+        const tabIds = new Set();
+        const duplicados = [];
+        
+        modulos.forEach(modulo => {
+            const tabId = window.configManager.getTabIdPorModulo(modulo);
+            if (tabIds.has(tabId)) {
+                duplicados.push(`TabId duplicado: ${tabId} (módulo: ${modulo})`);
+            }
+            tabIds.add(tabId);
+        });
+        
+        if (duplicados.length > 0) {
+            console.error('❌ TabIds duplicados:', duplicados);
+            return false;
+        }
+        
+        return true;
     }
 }
 

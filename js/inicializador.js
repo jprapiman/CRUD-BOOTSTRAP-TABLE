@@ -257,20 +257,26 @@ class CargadorScripts {
 
     // Ejecutar inicialización completa
     ejecutarInicializacionCompleta(detalles) {
-		// Validar mapeos completos (ahora más flexible)
+		// Validar configuración completa de módulos
 		if (window.ConfigValidaciones) {
-			const configValida = window.ConfigValidaciones.validarMapeosCompletos();
-			if (configValida) {
-				console.log('✅ Configuración validada correctamente');
+			const configValida = window.ConfigValidaciones.validarConfiguracionCompleta();
+			const tabIdsUnicos = window.ConfigValidaciones.validarTabIdsUnicos();
+			
+			if (configValida && tabIdsUnicos) {
+				console.log('✅ Configuración de módulos validada correctamente');
 			}
 			
-			// Debug opcional de mapeos
-			if (window.location.hash === '#debug-mapeos') {
-				window.ConfigValidaciones.debugMapeos();
+			// Debug opcional
+			if (window.location.hash === '#debug-modulos') {
+				window.ConfigValidaciones.debugConfiguracionModulos();
 			}
 		}
 		
-		// Resto del código...
+		// Mostrar estadísticas de módulos
+		if (window.configManager) {
+			const modulosCompletos = window.configManager.getModulosCompletos();
+			console.log(`📊 Módulos completamente configurados: ${modulosCompletos.length}/${window.configManager.getModulosConfigurados().length}`);
+		}
 		this.mostrarMensajeBienvenida();
 		
 		console.log('Inicialización completa finalizada correctamente');

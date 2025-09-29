@@ -222,24 +222,16 @@ class TableManager {
     }
 
     // En el método manejarCambioPestana, reemplazar:
-	// En manejarCambioPestana, simplificar:
 	manejarCambioPestana(tabId) {
 		console.log(`🔄 Cambiando a pestaña: ${tabId}`);
 		
-		if (!this.tables) {
-			console.error('❌ this.tables no está definido en TableManager');
-			this.tables = {};
+		if (!window.configManager) {
+			console.error('❌ ConfigManager no disponible');
+			return;
 		}
 		
-		// USAR CONFIGMANAGER PARA OBTENER MÓDULO
-		let modulo;
-		if (window.configManager) {
-			modulo = window.configManager.getModuloPorTabId(tabId);
-		} else {
-			modulo = tabId; // Fallback mínimo
-		}
-		
-		const tableId = this.generarTableId(modulo);
+		const modulo = window.configManager.getModuloPorTabId(tabId);
+		const tableId = window.configManager.getTableIdPorModulo(modulo);
 		
 		console.log(`📋 Módulo: ${modulo}, TableID: ${tableId}`);
 		
@@ -247,20 +239,14 @@ class TableManager {
 			console.log(`✅ Cargando tabla existente: ${tableId}`);
 			this.cargarTabla(tableId);
 		} else {
-			console.warn(`⚠️ Tabla no inicializada: ${tableId}`);
+			console.log(`🔄 Inicializando tabla bajo demanda: ${tableId}`);
 			this.intentarInicializarTabla(modulo, tableId);
 		}
 	}
 
-	// En generarTableId, simplificar:
+	// En generarTableId, ahora es muy simple:
 	generarTableId(modulo) {
-		// USAR CONFIGMANAGER
-		if (window.configManager) {
-			return window.configManager.getTableIdPorModulo(modulo);
-		}
-		
-		// Fallback genérico
-		return `tabla${this.capitalize(modulo)}`;
+		return window.configManager.getTableIdPorModulo(modulo);
 	}
 
     intentarInicializarTabla(modulo, tableId) {

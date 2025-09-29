@@ -263,47 +263,65 @@ class ConfigManager {
 	}
 	
 	// En la clase ConfigManager, agregar:
-
-	// Obtener tabId (usando ConfigValidaciones si está disponible)
+	// Obtener tabId desde la configuración del módulo
 	getTabIdPorModulo(modulo) {
-		if (window.ConfigValidaciones) {
-			return window.ConfigValidaciones.obtenerTabIdConfigurado(modulo);
+		const moduloConfig = this.getModuloConfig(modulo);
+		if (moduloConfig && moduloConfig.tabId) {
+			return moduloConfig.tabId;
 		}
 		
-		// Fallback si ConfigValidaciones no está disponible
-		if (this.config.mapeos && this.config.mapeos.moduloToTabId) {
-			return this.config.mapeos.moduloToTabId[modulo] || modulo;
-		}
-		return modulo;
+		// Fallback: generar desde nombre del módulo
+		return modulo.replace(/_/g, '-');
 	}
 
-	// Obtener tableId (usando ConfigValidaciones si está disponible)
+	// Obtener tableId desde la configuración del módulo  
 	getTableIdPorModulo(modulo) {
-		if (window.ConfigValidaciones) {
-			return window.ConfigValidaciones.obtenerTableIdConfigurado(modulo);
+		const moduloConfig = this.getModuloConfig(modulo);
+		if (moduloConfig && moduloConfig.tableId) {
+			return moduloConfig.tableId;
 		}
 		
-		// Fallback si ConfigValidaciones no está disponible
-		if (this.config.mapeos && this.config.mapeos.moduloToTableId) {
-			return this.config.mapeos.moduloToTableId[modulo] || `tabla${this.capitalize(modulo)}`;
-		}
+		// Fallback: generar desde nombre del módulo
 		return `tabla${this.capitalize(modulo)}`;
 	}
 
-	// Obtener módulo por tabId (reverse lookup mejorado)
+	// Obtener módulo por tabId (buscando en todos los módulos)
 	getModuloPorTabId(tabId) {
-		if (this.config.mapeos && this.config.mapeos.moduloToTabId) {
-			const mapeos = this.config.mapeos.moduloToTabId;
-			const modulo = Object.keys(mapeos).find(mod => mapeos[mod] === tabId);
-			if (modulo) return modulo;
+		const modulos = this.getModulosConfigurados();
+		
+		for (let modulo of modulos) {
+			const moduloConfig = this.getModuloConfig(modulo);
+			if (moduloConfig && moduloConfig.tabId === tabId) {
+				return modulo;
+			}
 		}
 		
-		// Si no se encuentra en mapeos explícitos, asumir que tabId = nombre módulo
+		// Si no se encuentra, asumir que tabId = nombre módulo
 		return tabId;
 	}
-	// Obtener orden de pestañas
-	getOrdenPestanas() {
-		return this.config.mapeos?.ordenPestanas || this.getModulosConfigurados();
+
+	// Obtener orden de módulos
+	getOrdenModulos() {
+		return this.config.ordenModulos || this.getModulosConfigurados();
+	}
+
+	// Verificar si un módulo tiene configuración completa
+	tieneConfiguracionCompleta(modulo) {
+		const config = this.getModuloConfig(modulo);
+		return config && 
+			   config.tabId && 
+			   config.tableId &&
+			   config.columnasFormulario && 
+			   config.columnasFormulario.length > 0 &&
+			   config.columnasTablas && 
+			   config.columnasTablas.length > 0;
+	}
+
+	// Obtener módulos con configuración completa
+	getModulosCompletos() {
+		return this.getModulosConfigurados().filter(modulo => 
+			this.tieneConfiguracionCompleta(modulo)
+		);
 	}
 
 	// Capitalizar texto (método de utilidad)

@@ -158,76 +158,97 @@ class GeneradorHTML {
 			return '';
 		}
 
-		const modulos = Object.keys(this.config.modulos);
-		const textos = this.config.textos;
+		// USAR ORDEN DESDE CONFIGURACIÓN
+		let modulos;
+		if (window.configManager) {
+			modulos = window.configManager.getOrdenModulos();
+		} else {
+			modulos = Object.keys(this.config.modulos);
+		}
+
 		let contenidoHTML = '';
 		
 		modulos.forEach((modulo, index) => {
 			const moduloConfig = this.config.modulos[modulo];
 			const activeClass = index === 0 ? 'show active' : '';
-			const tabId = this.convertirModuloATabId(modulo);
-			const tableId = `tabla${this.capitalize(modulo)}`;
+			const tabId = window.configManager ? 
+				window.configManager.getTabIdPorModulo(modulo) : 
+				moduloConfig.tabId || modulo;
 			
-			contenidoHTML += `
-				<div class="tab-pane fade ${activeClass}" 
-					 id="${tabId}" 
-					 role="tabpanel" 
-					 aria-labelledby="${tabId}-tab">
-					
-					<!-- Header de la pestaña -->
-					<div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
-						<div class="mb-3 mb-md-0">
-							<h4 class="mb-1 d-flex align-items-center">
-								<i class="${moduloConfig.icono || 'fas fa-cube'} text-primary me-2"></i>
-								${moduloConfig.plural}
-							</h4>
-							<p class="text-muted mb-0">${moduloConfig.descripcion || `Gestión completa de ${moduloConfig.plural.toLowerCase()}`}</p>
-						</div>
+			const tableId = window.configManager ?
+				window.configManager.getTableIdPorModulo(modulo) :
+				moduloConfig.tableId || `tabla${this.capitalize(modulo)}`;
+			const modulos = Object.keys(this.config.modulos);
+			const textos = this.config.textos;
+			let contenidoHTML = '';
+			
+			modulos.forEach((modulo, index) => {
+				const moduloConfig = this.config.modulos[modulo];
+				const activeClass = index === 0 ? 'show active' : '';
+				const tabId = this.convertirModuloATabId(modulo);
+				const tableId = `tabla${this.capitalize(modulo)}`;
+				
+				contenidoHTML += `
+					<div class="tab-pane fade ${activeClass}" 
+						 id="${tabId}" 
+						 role="tabpanel" 
+						 aria-labelledby="${tabId}-tab">
 						
-						<div class="d-flex gap-2 flex-wrap">
-							<button type="button" 
-									class="btn btn-primary btn-sm d-flex align-items-center"
-									onclick="abrirModal('${modulo}')">
-								<i class="${this.config.ui.iconos.crear} me-1"></i>
-								${textos.botones.nuevo} ${moduloConfig.singular}
-							</button>
+						<!-- Header de la pestaña -->
+						<div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
+							<div class="mb-3 mb-md-0">
+								<h4 class="mb-1 d-flex align-items-center">
+									<i class="${moduloConfig.icono || 'fas fa-cube'} text-primary me-2"></i>
+									${moduloConfig.plural}
+								</h4>
+								<p class="text-muted mb-0">${moduloConfig.descripcion || `Gestión completa de ${moduloConfig.plural.toLowerCase()}`}</p>
+							</div>
 							
-							<button type="button" 
-									class="btn btn-outline-secondary btn-sm d-flex align-items-center"
-									onclick="recargarTabla('${tableId}')">
-								<i class="fas fa-sync-alt me-1"></i>
-								Actualizar
-							</button>
+							<div class="d-flex gap-2 flex-wrap">
+								<button type="button" 
+										class="btn btn-primary btn-sm d-flex align-items-center"
+										onclick="abrirModal('${modulo}')">
+									<i class="${this.config.ui.iconos.crear} me-1"></i>
+									${textos.botones.nuevo} ${moduloConfig.singular}
+								</button>
+								
+								<button type="button" 
+										class="btn btn-outline-secondary btn-sm d-flex align-items-center"
+										onclick="recargarTabla('${tableId}')">
+									<i class="fas fa-sync-alt me-1"></i>
+									Actualizar
+								</button>
+							</div>
 						</div>
-					</div>
 
-					<!-- Estadísticas rápidas -->
-					<div class="row mb-4">
-						<div class="col-md-3">
-							<div class="card bg-primary text-white">
-								<div class="card-body py-3">
-									<div class="d-flex align-items-center">
-										<div class="flex-grow-1">
-											<h6 class="card-title mb-0">Total Registros</h6>
-											<small id="contador-${tableId}">Cargando...</small>
+						<!-- Estadísticas rápidas -->
+						<div class="row mb-4">
+							<div class="col-md-3">
+								<div class="card bg-primary text-white">
+									<div class="card-body py-3">
+										<div class="d-flex align-items-center">
+											<div class="flex-grow-1">
+												<h6 class="card-title mb-0">Total Registros</h6>
+												<small id="contador-${tableId}">Cargando...</small>
+											</div>
+											<i class="fas fa-database fs-4 opacity-50"></i>
 										</div>
-										<i class="fas fa-database fs-4 opacity-50"></i>
 									</div>
 								</div>
 							</div>
 						</div>
-					</div>
 
-					<!-- Tabla -->
-					<div class="card">
-						<div class="card-body p-0">
-							<div class="table-responsive" style="max-height: 600px;">
-								${this.generarTabla(tableId, modulo, moduloConfig)}
+						<!-- Tabla -->
+						<div class="card">
+							<div class="card-body p-0">
+								<div class="table-responsive" style="max-height: 600px;">
+									${this.generarTabla(tableId, modulo, moduloConfig)}
+								</div>
 							</div>
 						</div>
 					</div>
-				</div>
-			`;
+				`;
+			});
 		});
 
 		return contenidoHTML;
