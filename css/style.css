@@ -119,7 +119,6 @@ html {
 /* ===== CARDS MODERNAS CON EFECTOS ===== */
 .card {
     border: none;
-    border-radius: var(--border-radius);
     background: white;
     box-shadow: var(--box-shadow-md);
     transition: all var(--transition-speed) ease;
@@ -1213,8 +1212,7 @@ html {
 /* ===== BOOTSTRAP TABLE CUSTOM TOOLBAR ===== */
 .custom-toolbar {
     background: white;
-    border-radius: var(--border-radius) var(--border-radius) 0 0;
-    padding: 1.25rem 1.75rem;
+    padding: 0 1.25rem;
     border-bottom: 1px solid #e2e8f0;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
     position: relative;
@@ -1470,7 +1468,6 @@ html {
 /* ===== CONTENEDOR INTEGRADO ===== */
 .table-container-integrated {
     background: white;
-    border-radius: var(--border-radius);
     overflow: hidden;
     box-shadow: var(--box-shadow-md);
 }

@@ -18,72 +18,118 @@ class GeneradorHTML {
     // ===== GENERADORES DE ESTRUCTURA PRINCIPAL =====
 	
 	// Navbar mejorado con menú responsive
-	generarNavbar() {
-		const branding = this.config.branding;
-		const navegacion = this.config.navegacion;
+	// ===== GENERADORES DE ESTRUCTURA PRINCIPAL =====
 
-		return `
-			<nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top shadow-sm">
-				<div class="container-fluid">
-					<a class="navbar-brand fw-bold" href="#">
-						<i class="${branding.logo} me-2"></i>
-						${branding.nombre}
-					</a>
-					
-					<button class="navbar-toggler d-lg-none" type="button" onclick="toggleSidebar()">
-						<span class="navbar-toggler-icon"></span>
-					</button>
-					
-					<div class="collapse navbar-collapse">
-						<ul class="navbar-nav ms-auto">
-							${navegacion.menuPrincipal.map(item => `
-								<li class="nav-item">
-									<a class="nav-link" href="${item.url}">
-										<i class="${item.icono}"></i>
-										${item.nombre}
-									</a>
-								</li>
-							`).join('')}
-						</ul>
-					</div>
-				</div>
-			</nav>
-		`;
-	}
+// Navbar mejorado con menú responsive Y menú de usuario
+generarNavbar() {
+    const branding = this.config.branding;
+    const navegacion = this.config.navegacion;
 
-    // Generar menú de usuario
-    generarMenuUsuario() {
-        const navegacion = this.config.navegacion;
-        const usuario = navegacion.usuarioDefecto;
-        const menu = navegacion.menuUsuario || [];
-
-        return `
-            <ul class="navbar-nav ms-auto">
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                        <i class="${usuario.avatar}"></i>
-                        ${usuario.nombre}
-                    </a>
-                    <ul class="dropdown-menu">
-                        ${menu.map(item => {
-                            if (item.separador) {
-                                return '<li><hr class="dropdown-divider"></li>';
-                            }
-                            return `
-                                <li>
-                                    <a class="dropdown-item ${item.clase || ''}" href="${item.url || '#'}" 
-                                       ${item.accion ? `onclick="${item.accion}()"` : ''}>
-                                        <i class="${item.icono}"></i>
-                                        ${item.nombre}
-                                    </a>
-                                </li>
-                            `;
-                        }).join('')}
+    return `
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top shadow-sm">
+            <div class="container-fluid">
+                <a class="navbar-brand fw-bold" href="#">
+                    <i class="${branding.logo} me-2"></i>
+                    ${branding.nombre}
+                </a>
+                
+                <!-- Botón para toggle sidebar en móvil -->
+                <button class="navbar-toggler" type="button" onclick="toggleSidebar()">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                
+                <div class="collapse navbar-collapse">
+                    <!-- Menú de navegación principal -->
+                    <ul class="navbar-nav me-auto">
+                        ${navegacion.menuPrincipal.map(item => `
+                            <li class="nav-item">
+                                <a class="nav-link" href="${item.url}">
+                                    <i class="${item.icono}"></i>
+                                    ${item.nombre}
+                                </a>
+                            </li>
+                        `).join('')}
                     </ul>
-                </li>
-            </ul>
-        `;
-    }
+                    
+                    <!-- Menú de usuario -->
+                    ${this.generarMenuUsuario()}
+                </div>
+            </div>
+        </nav>
+    `;
+}
+
+// Generar menú de usuario (corregido)
+generarMenuUsuario() {
+    const navegacion = this.config.navegacion;
+    const usuario = navegacion.usuarioDefecto;
+    const menu = navegacion.menuUsuario || [];
+
+    return `
+        <ul class="navbar-nav">
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                    <i class="${usuario.avatar} me-1"></i>
+                    ${usuario.nombre}
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    ${menu.map(item => {
+                        if (item.separador) {
+                            return '<li><hr class="dropdown-divider"></li>';
+                        }
+                        return `
+                            <li>
+                                <a class="dropdown-item ${item.clase || ''}" href="${item.url || '#'}" 
+                                   ${item.accion ? `onclick="${item.accion}()"` : ''}>
+                                    <i class="${item.icono} me-2"></i>
+                                    ${item.nombre}
+                                </a>
+                            </li>
+                        `;
+                    }).join('')}
+                </ul>
+            </li>
+        </ul>
+    `;
+}
+
+// En generarAplicacionCompleta, asegurar que el sidebar tenga la clase correcta
+generarAplicacionCompleta() {
+    return `
+        ${this.generarNavbar()}
+        
+        <!-- Contenedor principal con sidebar -->
+        <div class="d-flex" id="wrapper">
+            <!-- Sidebar -->
+            <div class="bg-white border-end" id="sidebar-wrapper">
+                <div class="sidebar-heading border-bottom bg-light px-3 py-2">
+                    <h6 class="mb-0 d-flex align-items-center">
+                        <i class="fas fa-th-large me-2 text-primary"></i>
+                        Módulos
+                    </h6>
+                </div>
+                <div class="list-group list-group-flush">
+                    ${this.generarMenuLateral()}
+                </div>
+            </div>
+            
+            <!-- Contenido principal -->
+            <div id="page-content-wrapper">
+                <div class="container-fluid p-3">
+                    <!-- Área de notificaciones -->
+                    <div id="notificaciones" class="fixed-notifications"></div>
+                    
+                    <!-- Contenido dinámico del módulo -->
+                    <div id="contenido-modulo">
+                        <!-- El contenido se carga dinámicamente aquí -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        ${this.generarFooter()}
+    `;
+}
 
     // Generar título principal configurable
     generarTituloPrincipal() {
