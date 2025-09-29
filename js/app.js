@@ -945,3 +945,111 @@ function toggleSidebar() {
         sidebar.classList.toggle('active');
     }
 }
+
+// Función para filtrar tabla en tiempo real
+function filtrarTabla(tableId, searchTerm) {
+    const table = $(`#${tableId}`);
+    if (table.length && table.bootstrapTable) {
+        // Aplicar filtro usando Bootstrap Table
+        table.bootstrapTable('filterBy', {}, {
+            'filterAlgorithm': function(row, filters) {
+                if (!searchTerm || searchTerm.trim() === '') {
+                    return true;
+                }
+                
+                const searchLower = searchTerm.toLowerCase();
+                
+                // Buscar en todos los campos de la fila
+                for (let field in row) {
+                    if (row[field] && row[field].toString().toLowerCase().includes(searchLower)) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+        });
+    }
+}
+
+// Función para exportar datos
+function exportarDatos(modulo, formato) {
+    mostrarNotificacion(`Exportando ${modulo} en formato ${formato}...`, 'info');
+    
+    // Aquí implementarías la lógica de exportación
+    setTimeout(() => {
+        mostrarNotificacion(`${modulo} exportado exitosamente`, 'success');
+    }, 1500);
+}
+
+// Función para imprimir tabla
+function imprimirTabla(tableId) {
+    mostrarNotificacion('Preparando impresión...', 'info');
+    
+    // Implementar lógica de impresión
+    setTimeout(() => {
+        window.print();
+    }, 500);
+}
+
+// Actualizar contador de registros
+function actualizarContador(tableId, total, activos = 0) {
+    const contadorElement = document.getElementById(`contador-${tableId}`);
+    const activosElement = document.getElementById(`activos-${tableId}`);
+    
+    if (contadorElement) {
+        // Animación de contador
+        animateNumber(contadorElement, 0, total, 1000);
+    }
+    
+    if (activosElement) {
+        animateNumber(activosElement, 0, activos, 1200);
+    }
+}
+
+// Función para animar números
+function animateNumber(element, start, end, duration) {
+    const startTime = performance.now();
+    const difference = end - start;
+    
+    function step(currentTime) {
+        const elapsedTime = currentTime - startTime;
+        const progress = Math.min(elapsedTime / duration, 1);
+        
+        // Función de easing
+        const easedProgress = 1 - Math.pow(1 - progress, 3);
+        const currentNumber = Math.floor(start + (difference * easedProgress));
+        
+        element.textContent = currentNumber.toLocaleString();
+        
+        if (progress < 1) {
+            requestAnimationFrame(step);
+        }
+    }
+    
+    requestAnimationFrame(step);
+}
+
+// Inicializar tooltips
+function inicializarTooltips() {
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+}
+
+// Ejecutar al cargar
+document.addEventListener('DOMContentLoaded', function() {
+    inicializarTooltips();
+    
+    // Inicializar búsqueda en tiempo real para todos los campos de búsqueda
+    document.querySelectorAll('[id^="search-tabla"]').forEach(searchInput => {
+        let timeoutId;
+        searchInput.addEventListener('input', function() {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => {
+                const tableId = this.id.replace('search-', '');
+                filtrarTabla(tableId, this.value);
+            }, 300);
+        });
+    });
+});

@@ -17,16 +17,22 @@ const CONFIGURACION_SISTEMA = {
         logo: "fas fa-store",
         empresa: "Mi Empresa",
         slogan: "Gestión integral de inventario y ventas",
-        colores: {
-            primario: "#0d6efd",
-            secundario: "#6c757d",
-            exito: "#198754",
-            peligro: "#dc3545",
-            advertencia: "#ffc107",
-            info: "#0dcaf0",
-            oscuro: "#212529",
-            claro: "#f8f9fa"
-        },
+		colores: {
+			primario: "#667eea",
+			primarioDark: "#5568d3",
+			secundario: "#6c757d",
+			exito: "#10b981",
+			peligro: "#ef4444",
+			advertencia: "#f59e0b",
+			info: "#06b6d4",
+			oscuro: "#1e293b",
+			claro: "#f8fafc",
+			// Gradientes
+			gradientPrimario: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+			gradientSecundario: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+			gradientExito: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
+			gradientAdvertencia: "linear-gradient(135deg, #fa709a 0%, #fee140 100%)"
+		},
         favicon: "/favicon.ico"
     },
 

@@ -153,139 +153,164 @@ class GeneradorHTML {
 	}
 
     // Generar contenido de todas las pestañas usando configuración
-    generarContenidoPestanas() {
+    // En la clase GeneradorHTML, reemplaza el método generarContenidoPestanas
+	// En la clase GeneradorHTML, reemplaza el método generarContenidoPestanas
+	generarContenidoPestanas() {
 		if (!this.config || !this.config.modulos) {
 			return '';
 		}
 
-		// USAR ORDEN DESDE CONFIGURACIÓN
-		let modulos;
-		if (window.configManager) {
-			modulos = window.configManager.getOrdenModulos();
-		} else {
-			modulos = Object.keys(this.config.modulos);
-		}
-
+		const modulos = Object.keys(this.config.modulos);
+		const textos = this.config.textos;
 		let contenidoHTML = '';
 		
 		modulos.forEach((modulo, index) => {
 			const moduloConfig = this.config.modulos[modulo];
 			const activeClass = index === 0 ? 'show active' : '';
-			const tabId = window.configManager ? 
-				window.configManager.getTabIdPorModulo(modulo) : 
-				moduloConfig.tabId || modulo;
+			const tabId = this.convertirModuloATabId(modulo);
+			const tableId = `tabla${this.capitalize(modulo)}`;
 			
-			const tableId = window.configManager ?
-				window.configManager.getTableIdPorModulo(modulo) :
-				moduloConfig.tableId || `tabla${this.capitalize(modulo)}`;
-			const modulos = Object.keys(this.config.modulos);
-			const textos = this.config.textos;
-			let contenidoHTML = '';
-			
-			modulos.forEach((modulo, index) => {
-				const moduloConfig = this.config.modulos[modulo];
-				const activeClass = index === 0 ? 'show active' : '';
-				const tabId = this.convertirModuloATabId(modulo);
-				const tableId = `tabla${this.capitalize(modulo)}`;
-				
-				contenidoHTML += `
-					<div class="tab-pane fade ${activeClass}" 
-						 id="${tabId}" 
-						 role="tabpanel" 
-						 aria-labelledby="${tabId}-tab">
-						
-						<!-- Header de la pestaña -->
-						<div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
-							<div class="mb-3 mb-md-0">
-								<h4 class="mb-1 d-flex align-items-center">
-									<i class="${moduloConfig.icono || 'fas fa-cube'} text-primary me-2"></i>
-									${moduloConfig.plural}
-								</h4>
-								<p class="text-muted mb-0">${moduloConfig.descripcion || `Gestión completa de ${moduloConfig.plural.toLowerCase()}`}</p>
-							</div>
-							
-							<div class="d-flex gap-2 flex-wrap">
-								<button type="button" 
-										class="btn btn-primary btn-sm d-flex align-items-center"
-										onclick="abrirModal('${modulo}')">
-									<i class="${this.config.ui.iconos.crear} me-1"></i>
-									${textos.botones.nuevo} ${moduloConfig.singular}
-								</button>
-								
-								<button type="button" 
-										class="btn btn-outline-secondary btn-sm d-flex align-items-center"
-										onclick="recargarTabla('${tableId}')">
-									<i class="fas fa-sync-alt me-1"></i>
-									Actualizar
-								</button>
-							</div>
-						</div>
-
-						<!-- Estadísticas rápidas -->
-						<div class="row mb-4">
-							<div class="col-md-3">
-								<div class="card bg-primary text-white">
-									<div class="card-body py-3">
-										<div class="d-flex align-items-center">
-											<div class="flex-grow-1">
-												<h6 class="card-title mb-0">Total Registros</h6>
-												<small id="contador-${tableId}">Cargando...</small>
-											</div>
-											<i class="fas fa-database fs-4 opacity-50"></i>
-										</div>
-									</div>
+			contenidoHTML += `
+				<div class="tab-pane fade ${activeClass}" 
+					 id="${tabId}" 
+					 role="tabpanel" 
+					 aria-labelledby="${tabId}-tab">
+					
+					<!-- Estadísticas compactas (opcional) -->
+					<div class="row g-3 mb-3">
+						<div class="col-lg-3 col-md-4 col-sm-6">
+							<div class="stat-card-mini">
+								<div class="stat-content">
+									<div class="stat-number" id="contador-${tableId}">0</div>
+									<div class="stat-label">Total</div>
+								</div>
+								<div class="stat-icon">
+									<i class="fas fa-database"></i>
 								</div>
 							</div>
 						</div>
-
-						<!-- Tabla -->
-						<div class="card">
-							<div class="card-body p-0">
-								<div class="table-responsive" style="max-height: 600px;">
-									${this.generarTabla(tableId, modulo, moduloConfig)}
+						<div class="col-lg-3 col-md-4 col-sm-6">
+							<div class="stat-card-mini stat-card-success">
+								<div class="stat-content">
+									<div class="stat-number" id="activos-${tableId}">0</div>
+									<div class="stat-label">Activos</div>
+								</div>
+								<div class="stat-icon">
+									<i class="fas fa-check-circle"></i>
 								</div>
 							</div>
 						</div>
 					</div>
-				`;
-			});
+
+					<!-- Tabla con Custom Toolbar -->
+					<div class="table-container-integrated">
+						<div class="table-responsive">
+							${this.generarTablaConToolbar(tableId, modulo, moduloConfig)}
+						</div>
+					</div>
+				</div>
+			`;
 		});
 
 		return contenidoHTML;
 	}
-
-    // Generar estructura de tabla usando configuración de tablas
-    generarTabla(tableId, modulo, moduloConfig) {
-        const tablaConfig = this.config.tablas;
-        const descripcion = moduloConfig.descripcion || `Gestión de ${moduloConfig.plural.toLowerCase()}`;
-        
-        return `
-            <table id="${tableId}" 
-                   class="${tablaConfig.clases.tabla}"
-                   data-toggle="table"
-                   data-pagination="${tablaConfig.configuracionGlobal.pagination}"
-                   data-search="${tablaConfig.configuracionGlobal.search}"
-                   data-show-refresh="${tablaConfig.configuracionGlobal.showRefresh}"
-                   data-show-columns="${tablaConfig.configuracionGlobal.showColumns}"
-                   data-sort-name="${tablaConfig.configuracionGlobal.sortName}"
-                   data-sort-order="${tablaConfig.configuracionGlobal.sortOrder}"
-                   data-page-size="${tablaConfig.configuracionGlobal.pageSize}"
-                   data-page-list="[${tablaConfig.configuracionGlobal.pageList.join(',')}]">
-                <thead class="${tablaConfig.clases.cabecera}">
-                    <tr>
-                        <!-- Las columnas se generan dinámicamente desde la configuración -->
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Los datos se cargan dinámicamente vía AJAX -->
-                </tbody>
-            </table>
-            <small class="text-muted">
-                <i class="fas fa-info-circle"></i>
-                ${descripcion}
-            </small>
-        `;
-    }
+ 
+	// Nuevo método para generar tabla con toolbar personalizada
+	generarTablaConToolbar(tableId, modulo, moduloConfig) {
+		const tablaConfig = this.config.tablas;
+		const descripcion = moduloConfig.descripcion || `Gestión de ${moduloConfig.plural.toLowerCase()}`;
+		const textos = this.config.textos;
+		
+		return `
+			<!-- Toolbar personalizada (se renderiza automáticamente por Bootstrap Table) -->
+			<div id="toolbar-${tableId}" class="custom-toolbar">
+				<div class="toolbar-content">
+					<!-- Título del módulo -->
+					<div class="toolbar-title-section">
+						<h4 class="toolbar-title">
+							<i class="${moduloConfig.icono || 'fas fa-cube'} toolbar-icon"></i>
+							${moduloConfig.plural}
+						</h4>
+						<p class="toolbar-description">${descripcion}</p>
+					</div>
+					
+					<!-- Controles de la derecha -->
+					<div class="toolbar-controls">
+						
+						<!-- Botones de acción -->
+						<div class="toolbar-actions">
+							<button type="button" 
+									class="btn btn-primary btn-toolbar"
+									onclick="abrirModal('${modulo}')"
+									data-bs-toggle="tooltip"
+									title="Crear nuevo ${moduloConfig.singular.toLowerCase()}">
+								<i class="${this.config.ui.iconos.crear}"></i>
+								<span class="btn-text">Nuevo</span>
+							</button>
+							
+							<button type="button" 
+									class="btn btn-outline-secondary btn-toolbar"
+									onclick="recargarTabla('${tableId}')"
+									data-bs-toggle="tooltip"
+									title="Actualizar datos">
+								<i class="fas fa-sync-alt"></i>
+							</button>
+							
+							<div class="dropdown">
+								<button class="btn btn-outline-secondary btn-toolbar dropdown-toggle" 
+										type="button" 
+										data-bs-toggle="dropdown"
+										data-bs-toggle="tooltip"
+										title="Más opciones">
+									<i class="fas fa-ellipsis-v"></i>
+								</button>
+								<ul class="dropdown-menu dropdown-menu-end toolbar-dropdown">
+									<li>
+										<a class="dropdown-item" href="#" onclick="exportarDatos('${modulo}', 'excel')">
+											<i class="fas fa-file-excel text-success me-2"></i>Excel
+										</a>
+									</li>
+									<li>
+										<a class="dropdown-item" href="#" onclick="exportarDatos('${modulo}', 'pdf')">
+											<i class="fas fa-file-pdf text-danger me-2"></i>PDF
+										</a>
+									</li>
+									<li><hr class="dropdown-divider"></li>
+									<li>
+										<a class="dropdown-item" href="#" onclick="imprimirTabla('${tableId}')">
+											<i class="fas fa-print text-primary me-2"></i>Imprimir
+										</a>
+									</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			<table id="${tableId}" 
+				   class="${tablaConfig.clases.tabla}"
+				   data-toggle="table"
+				   data-toolbar="#toolbar-${tableId}"
+				   data-pagination="${tablaConfig.configuracionGlobal.pagination}"
+				   data-search="false"
+				   data-show-refresh="false"
+				   data-show-columns="${tablaConfig.configuracionGlobal.showColumns}"
+				   data-sort-name="${tablaConfig.configuracionGlobal.sortName}"
+				   data-sort-order="${tablaConfig.configuracionGlobal.sortOrder}"
+				   data-page-size="${tablaConfig.configuracionGlobal.pageSize}"
+				   data-page-list="[${tablaConfig.configuracionGlobal.pageList.join(',')}]">
+				<thead class="${tablaConfig.clases.cabecera}">
+					<tr>
+						<!-- Las columnas se generan dinámicamente desde la configuración -->
+					</tr>
+				</thead>
+				<tbody>
+					<!-- Los datos se cargan dinámicamente vía AJAX -->
+				</tbody>
+			</table>
+		`;
+	}
 
     // Generar modal usando configuración
     generarModal() {
@@ -642,47 +667,12 @@ class GeneradorHTML {
 		`;
 	}
 
-	// Generar HTML de tabla simple
-	generarTablaSimpleHTML(tableId, modulo, moduloConfig) {
-		return `
-			<table id="${tableId}" 
-				   class="table table-hover mb-0"
-				   data-toggle="table"
-				   data-pagination="true"
-				   data-search="true"
-				   data-show-refresh="false"
-				   data-show-columns="true"
-				   data-page-size="15">
-				<thead>
-					<tr></tr>
-				</thead>
-				<tbody></tbody>
-			</table>
-		`;
-	}
-
 	// Generar HTML de contenido de módulo
 	generarContenidoModuloHTML(modulo, moduloConfig, tableId) {
 		return `
-			<div class="d-flex justify-content-between align-items-center mb-3">
-				<h4 class="mb-0 d-flex align-items-center">
-					<i class="${moduloConfig.icono} me-2 text-primary"></i>
-					${moduloConfig.plural}
-				</h4>
-				<div class="btn-group" role="group">
-					<button class="btn btn-primary btn-sm" onclick="abrirModal('${modulo}')">
-						<i class="fas fa-plus"></i>
-						Nuevo
-					</button>
-					<button class="btn btn-outline-secondary btn-sm" onclick="recargarTabla('${tableId}')">
-						<i class="fas fa-sync-alt"></i>
-					</button>
-				</div>
-			</div>
-			
 			<div class="card shadow-sm">
 				<div class="card-body p-0">
-					${this.generarTablaSimpleHTML(tableId, modulo, moduloConfig)}
+					${this.generarTablaConToolbar(tableId, modulo, moduloConfig)}
 				</div>
 			</div>
 		`;
