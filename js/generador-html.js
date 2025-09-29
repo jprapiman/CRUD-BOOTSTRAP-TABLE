@@ -16,83 +16,40 @@ class GeneradorHTML {
     }
 
     // ===== GENERADORES DE ESTRUCTURA PRINCIPAL =====
+	
 	// Navbar mejorado con menú responsive
 	generarNavbar() {
 		const branding = this.config.branding;
 		const navegacion = this.config.navegacion;
-		const textos = this.config.textos;
 
 		return `
-			<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm ${navegacion.navbar?.fijo ? 'fixed-top' : ''}">
+			<nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top shadow-sm">
 				<div class="container-fluid">
-					${navegacion.navbar?.mostrarLogo ? `
-						<a class="navbar-brand d-flex align-items-center fw-bold" href="#">
-							<i class="${branding.logo} fs-4 me-2"></i>
-							${branding.nombre}
-							<small class="badge bg-light text-primary ms-2 fs-3">v${this.config.sistema.version}</small>
-						</a>
-					` : ''}
+					<a class="navbar-brand fw-bold" href="#">
+						<i class="${branding.logo} me-2"></i>
+						${branding.nombre}
+					</a>
 					
-					<!-- Botón para menú responsive -->
-					<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain" 
-							aria-controls="navbarMain" aria-expanded="false" aria-label="Toggle navigation">
+					<button class="navbar-toggler d-lg-none" type="button" onclick="toggleSidebar()">
 						<span class="navbar-toggler-icon"></span>
 					</button>
 					
-					<div class="collapse navbar-collapse" id="navbarMain">
-						${this.generarMenuPrincipal()}
-						${navegacion.mostrarUsuario ? this.generarMenuUsuario() : ''}
+					<div class="collapse navbar-collapse">
+						<ul class="navbar-nav ms-auto">
+							${navegacion.menuPrincipal.map(item => `
+								<li class="nav-item">
+									<a class="nav-link" href="${item.url}">
+										<i class="${item.icono}"></i>
+										${item.nombre}
+									</a>
+								</li>
+							`).join('')}
+						</ul>
 					</div>
 				</div>
 			</nav>
 		`;
 	}
-
-	// Menú principal mejorado
-	generarMenuPrincipal() {
-		const menu = this.config.navegacion.menuPrincipal || [];
-		
-		if (menu.length === 0) return '';
-
-		return `
-			<ul class="navbar-nav me-auto">
-				${menu.map(item => {
-					const activeClass = item.activo ? 'active' : '';
-					return `
-						<li class="nav-item">
-							<a class="nav-link ${activeClass} d-flex align-items-center" href="${item.url}">
-								<i class="${item.icono} me-2"></i>
-								<span class="nav-text">${item.nombre}</span>
-							</a>
-						</li>
-					`;
-				}).join('')}
-			</ul>
-		`;
-	}
-    // Generar menú principal
-    generarMenuPrincipal() {
-        const menu = this.config.navegacion.menuPrincipal || [];
-        
-        if (menu.length === 0) return '';
-
-        let menuHTML = '<ul class="navbar-nav me-auto">';
-        
-        menu.forEach(item => {
-            const activeClass = item.activo ? 'active' : '';
-            menuHTML += `
-                <li class="nav-item">
-                    <a class="nav-link ${activeClass}" href="${item.url}">
-                        <i class="${item.icono}"></i>
-                        ${item.nombre}
-                    </a>
-                </li>
-            `;
-        });
-        
-        menuHTML += '</ul>';
-        return menuHTML;
-    }
 
     // Generar menú de usuario
     generarMenuUsuario() {
@@ -147,21 +104,33 @@ class GeneradorHTML {
     }
 
     // Generar todas las pestañas usando configuración
-    generarPestanas() {
-        if (!this.config || !this.config.modulos) {
-            console.error('❌ No hay configuración de módulos disponible');
-            return '';
-        }
+    // En generarPestanas, mejorar para usar configuración:
+	generarPestanas() {
+		if (!this.config || !this.config.modulos) {
+			console.error('❌ No hay configuración de módulos disponible');
+			return '';
+		}
 
-        const modulos = Object.keys(this.config.modulos);
-        let pestanasHTML = '';
-        
-        modulos.forEach((modulo, index) => {
-            const moduloConfig = this.config.modulos[modulo];
-            const activeClass = index === 0 ? 'active' : '';
-            const tabId = this.convertirModuloATabId(modulo);
-            
-            // En generador-html.js, en generarPestanas(), modifica el onclick:
+		// USAR ORDEN CONFIGURADO SI EXISTE
+		let modulos;
+		if (this.config.mapeos && this.config.mapeos.ordenPestanas) {
+			modulos = this.config.mapeos.ordenPestanas;
+		} else {
+			modulos = Object.keys(this.config.modulos);
+		}
+
+		let pestanasHTML = '';
+		
+		modulos.forEach((modulo, index) => {
+			const moduloConfig = this.config.modulos[modulo];
+			if (!moduloConfig) {
+				console.warn(`⚠️ Configuración no encontrada para módulo: ${modulo}`);
+				return;
+			}
+			
+			const activeClass = index === 0 ? 'active' : '';
+			const tabId = this.convertirModuloATabId(modulo);
+			
 			pestanasHTML += `
 				<li class="nav-item" role="presentation">
 					<button class="nav-link ${activeClass}" 
@@ -178,10 +147,10 @@ class GeneradorHTML {
 					</button>
 				</li>
 			`;
-        });
+		});
 
-        return pestanasHTML;
-    }
+		return pestanasHTML;
+	}
 
     // Generar contenido de todas las pestañas usando configuración
     generarContenidoPestanas() {
@@ -298,8 +267,7 @@ class GeneradorHTML {
     }
 
     // Generar modal usando configuración
-    // En generador-html.js, reemplaza el método generarModal:
-	generarModal() {
+    generarModal() {
 		const modal = this.config.modal;
 		const textos = this.config.textos;
 
@@ -370,24 +338,11 @@ class GeneradorHTML {
     }
 
     // ===== MÉTODOS DE UTILIDAD =====
-// En generador-html.js, verifica que el método use la configuración:
+
+	// Convertir módulo a tabId
+	// En GeneradorHTML, reemplazar:
 	convertirModuloATabId(modulo) {
-		// Usar configuración si está disponible
-		if (this.config.mapeos && this.config.mapeos.moduloToTabId) {
-			const tabIdConfigurado = this.config.mapeos.moduloToTabId[modulo];
-			if (tabIdConfigurado) {
-				return tabIdConfigurado;
-			}
-		}
-		
-		// Fallback a mapeo original
-		const mapa = {
-			'tipos_documento': 'tipos-documento',
-			'tipos_promocion': 'tipos-promocion',
-			'metodos_pago': 'metodos-pago'
-		};
-		
-		return mapa[modulo] || modulo;
+		return window.configManager.getTabIdPorModulo(modulo);
 	}
 
     // Capitalizar nombre de módulo
@@ -432,115 +387,308 @@ class GeneradorHTML {
 
 		return pestanasHTML;
 	}
-	generarEstructuraCompleta() {
-		const textos = this.config.textos.titulos;
 
+	generarAplicacionCompleta() {
 		return `
-			<!-- Header con breadcrumb -->
-			<div class="container-fluid mt-4">
-				<div class="row mb-4">
-					<div class="col-12">
-						<nav aria-label="breadcrumb">
-							<ol class="breadcrumb">
-								<li class="breadcrumb-item"><a href="#"><i class="fas fa-home"></i> Inicio</a></li>
-								<li class="breadcrumb-item active">Gestión</li>
-							</ol>
-						</nav>
-						
-						${this.generarTituloPrincipal()}
+			${this.generarNavbar()}
+			
+			<!-- Contenedor principal con sidebar -->
+			<div class="d-flex" id="wrapper">
+				<!-- Sidebar -->
+				<div class="bg-white border-end" id="sidebar-wrapper">
+					<div class="sidebar-heading border-bottom bg-light px-3 py-2">
+						<h6 class="mb-0 d-flex align-items-center">
+							<i class="fas fa-th-large me-2 text-primary"></i>
+							Módulos
+						</h6>
+					</div>
+					<div class="list-group list-group-flush">
+						${this.generarMenuLateral()}
 					</div>
 				</div>
-
-				<!-- Sistema de pestañas mejorado -->
-				<div class="row">
-					<div class="col-12">
-						<div class="card shadow-sm">
-							<div class="card-header bg-white border-bottom-0">
-								<!-- Navegación de pestañas responsive -->
-								<div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
-									<h5 class="card-title mb-3 mb-md-0">
-										<i class="fas fa-table me-2 text-primary"></i>
-										Gestión del Sistema
-									</h5>
-									
-									<!-- Filtros y búsqueda rápida -->
-									<div class="d-flex gap-2 flex-wrap">
-										<div class="input-group input-group-sm" style="width: 250px;">
-											<span class="input-group-text bg-light">
-												<i class="fas fa-search"></i>
-											</span>
-											<input type="text" class="form-control" placeholder="Buscar en todas las tablas..." id="busquedaGlobal">
-										</div>
-										<button class="btn btn-outline-primary btn-sm" onclick="exportarTodo()">
-											<i class="fas fa-download me-1"></i>
-											Exportar
-										</button>
-									</div>
-								</div>
-							</div>
-							
-							<div class="card-body p-0">
-								<!-- Pestañas verticales en desktop, horizontales en mobile -->
-								<div class="row g-0">
-									<!-- Sidebar con pestañas en desktop -->
-									<div class="col-lg-3 col-xl-2 d-none d-lg-block border-end bg-light">
-										<div class="nav flex-column nav-pills h-100" id="v-pills-tab" role="tablist" aria-orientation="vertical">
-											${this.generarPestanasVerticales()}
-										</div>
-									</div>
-									
-									<!-- Contenido principal -->
-									<div class="col-lg-9 col-xl-10">
-										<!-- Pestañas horizontales en mobile -->
-										<div class="d-lg-none border-bottom">
-											<ul class="nav nav-pills nav-fill px-3 pt-3" id="mobile-tab" role="tablist">
-												${this.generarPestanas()}
-											</ul>
-										</div>
-										
-										<!-- Contenido de pestañas -->
-										<div class="tab-content p-3" id="myTabContent">
-											${this.generarContenidoPestanas()}
-										</div>
-									</div>
-								</div>
-							</div>
+				
+				<!-- Contenido principal -->
+				<div id="page-content-wrapper">
+					<div class="container-fluid p-3">
+						<!-- Área de notificaciones -->
+						<div id="notificaciones" class="fixed-notifications"></div>
+						
+						<!-- Contenido dinámico del módulo SIN HEADER -->
+						<div id="contenido-modulo">
+							<!-- El contenido se carga dinámicamente aquí -->
 						</div>
+					</div>
+				</div>
+			</div>
+			
+			${this.generarFooter()}
+		`;
+	}
+	
+	// Generar HTML de error crítico
+	generarErrorCriticoHTML(error, scriptsExitosos, scriptsFallidos) {
+		return `
+			<div class="container mt-5">
+				<div class="alert alert-danger" role="alert">
+					<h4 class="alert-heading">Error Crítico</h4>
+					<p>No se pudo cargar la aplicación completamente.</p>
+					<hr>
+					<p class="mb-0">
+						<strong>Error:</strong> ${error.message}<br>
+						<strong>Scripts cargados:</strong> ${scriptsExitosos.join(', ')}<br>
+						<strong>Scripts fallidos:</strong> ${scriptsFallidos.map(f => f.src).join(', ')}
+					</p>
+					<button class="btn btn-outline-danger mt-3" onclick="location.reload()">
+						<i class="fas fa-sync"></i> Recargar Página
+					</button>
+				</div>
+			</div>
+		`;
+	}
+	// Generar HTML de notificaciones
+	generarNotificacionHTML(notificacion) {
+		const textos = CONFIGURACION_SISTEMA?.textos?.botones || { cerrar: 'Cerrar' };
+		
+		return `
+			<div id="notificacion-${notificacion.id}" 
+				 class="alert ${notificacion.clase} alert-dismissible fade show mb-2" 
+				 role="alert"
+				 data-tipo="${notificacion.tipo}">
+				
+				<div class="d-flex align-items-start">
+					<div class="me-2">
+						<i class="fas ${notificacion.icono}"></i>
+					</div>
+					
+					<div class="flex-grow-1">
+						${notificacion.titulo ? `<strong>${notificacion.titulo}:</strong> ` : ''}
+						<span class="notificacion-mensaje">${notificacion.mensaje}</span>
+						
+						${this.config.notificaciones?.mostrarTimestamp ? `
+							<small class="d-block text-muted mt-1">
+								${notificacion.timestamp.toLocaleTimeString()}
+							</small>
+						` : ''}
+					</div>
+					
+					<button type="button" 
+							class="btn-close" 
+							data-bs-dismiss="alert" 
+							aria-label="${textos.cerrar}"
+							onclick="sistemaNotificaciones.cerrar('${notificacion.id}')">
+					</button>
+				</div>
+			</div>
+		`;
+	}
+
+	// Generar HTML de confirmación
+	generarConfirmacionHTML(notificacionId, mensaje) {
+		const textos = CONFIGURACION_SISTEMA?.textos?.botones || {};
+		
+		return `
+			<div id="notificacion-${notificacionId}" 
+				 class="alert alert-warning alert-dismissible fade show mb-2" 
+				 role="alert">
+				
+				<div class="d-flex align-items-center">
+					<i class="fas fa-question-circle me-2"></i>
+					<span class="flex-grow-1">${mensaje}</span>
+					
+					<div class="btn-group ms-2" role="group">
+						<button type="button" 
+								class="btn btn-sm btn-success" 
+								onclick="sistemaNotificaciones.confirmar('${notificacionId}', true)">
+							<i class="fas fa-check"></i>
+							${textos.si || 'Sí'}
+						</button>
+						<button type="button" 
+								class="btn btn-sm btn-secondary" 
+								onclick="sistemaNotificaciones.confirmar('${notificacionId}', false)">
+							<i class="fas fa-times"></i>
+							${textos.no || 'No'}
+						</button>
 					</div>
 				</div>
 			</div>
 		`;
 	}
 
-    // Generar estructura completa de la aplicación
-    generarAplicacionCompleta() {
-        return `
-            ${this.generarNavbar()}
-            
-            <!-- Contenido principal -->
-            <div class="container-fluid mt-4">
-                <!-- Área de notificaciones -->
-                <div id="notificaciones" class="fixed-notifications"></div>
+	// Generar HTML de formulario para modal
+	generarFormularioHTML(camposConfig, datos = null) {
+		let html = '<form id="formModal">';
+		camposConfig.forEach(campo => {
+			html += this.generarCampoFormularioHTML(campo, datos);
+		});
+		html += '</form>';
+		return html;
+	}
 
-                ${this.generarTituloPrincipal()}
-                
-                <!-- Contenedor de pestañas y tablas -->
-                <div id="contenedor-dinamico">
-                    <!-- Nav tabs generadas dinámicamente -->
-                    <ul class="nav nav-tabs" id="myTab" role="tablist">
-                        ${this.generarPestanas()}
-                    </ul>
+	// Generar HTML de campo individual del formulario
+	generarCampoFormularioHTML(campo, datos = null) {
+		const valor = datos ? datos[campo.name] : '';
+		const requiredAttr = campo.required ? 'required' : '';
+		const readonlyAttr = campo.readonly ? 'readonly' : '';
+		const requiredClass = campo.required ? 'required' : '';
+		
+		let html = `<div class="mb-3">`;
+		html += `<label for="${campo.name}" class="form-label ${requiredClass}">${campo.label}</label>`;
+		
+		switch (campo.type) {
+			case 'text':
+			case 'email':
+			case 'tel':
+			case 'password':
+			case 'number':
+				html += `<input type="${campo.type}" class="form-control" id="${campo.name}" name="${campo.name}" 
+						 value="${valor || ''}" ${requiredAttr} ${readonlyAttr}
+						 placeholder="${campo.placeholder || ''}"
+						 ${campo.min ? `min="${campo.min}"` : ''} ${campo.step ? `step="${campo.step}"` : ''}>`;
+				break;
+				
+			case 'textarea':
+				html += `<textarea class="form-control" id="${campo.name}" name="${campo.name}" 
+						 rows="4" ${requiredAttr} ${readonlyAttr} placeholder="${campo.placeholder || ''}">${valor || ''}</textarea>`;
+				break;
+				
+			case 'select':
+				html += `<select class="form-select" id="${campo.name}" name="${campo.name}" ${requiredAttr} ${readonlyAttr}>`;
+				html += `<option value="">Seleccione...</option>`;
+				(campo.options || []).forEach(opt => {
+					const selected = valor == opt.value ? 'selected' : '';
+					html += `<option value="${opt.value}" ${selected}>${opt.text}</option>`;
+				});
+				html += `</select>`;
+				break;
+				
+			case 'select-multiple':
+				html += `<select class="form-select" id="${campo.name}" name="${campo.name}" multiple ${requiredAttr}>`;
+				(campo.options || []).forEach(opt => {
+					const selected = datos && datos.categorias && datos.categorias.includes(opt.text) ? 'selected' : '';
+					html += `<option value="${opt.value}" ${selected}>${opt.text}</option>`;
+				});
+				html += `</select>`;
+				html += `<div class="form-text">Mantén presionada la tecla Ctrl para seleccionar múltiples opciones</div>`;
+				break;
+				
+			case 'checkbox':
+				const checked = datos ? (valor ? 'checked' : '') : (campo.checked ? 'checked' : '');
+				html += `<div class="form-check">`;
+				html += `<input class="form-check-input" type="checkbox" id="${campo.name}" name="${campo.name}" ${checked}>`;
+				html += `<label class="form-check-label" for="${campo.name}">${campo.label}</label>`;
+				html += `</div>`;
+				break;
+		}
+		
+		if (campo.placeholder && campo.type !== 'checkbox') {
+			html += `<div class="form-text">${campo.placeholder}</div>`;
+		}
+		
+		html += `</div>`;
+		return html;
+	}
 
-                    <!-- Tab content generado dinámicamente -->
-                    <div class="tab-content" id="myTabContent">
-                        ${this.generarContenidoPestanas()}
-                    </div>
-                </div>
-            </div>
+	// Generar HTML de tabla Bootstrap
+	generarTablaBootstrapHTML(tableId, modulo, moduloConfig) {
+		const tablaConfig = this.config.tablas;
+		const descripcion = moduloConfig.descripcion || `Gestión de ${moduloConfig.plural.toLowerCase()}`;
+		
+		return `
+			<table id="${tableId}" 
+				   class="${tablaConfig.clases.tabla}"
+				   data-toggle="table"
+				   data-pagination="${tablaConfig.configuracionGlobal.pagination}"
+				   data-search="${tablaConfig.configuracionGlobal.search}"
+				   data-show-refresh="${tablaConfig.configuracionGlobal.showRefresh}"
+				   data-show-columns="${tablaConfig.configuracionGlobal.showColumns}"
+				   data-sort-name="${tablaConfig.configuracionGlobal.sortName}"
+				   data-sort-order="${tablaConfig.configuracionGlobal.sortOrder}"
+				   data-page-size="${tablaConfig.configuracionGlobal.pageSize}"
+				   data-page-list="[${tablaConfig.configuracionGlobal.pageList.join(',')}]">
+				<thead class="${tablaConfig.clases.cabecera}">
+					<tr>
+						<!-- Las columnas se generan dinámicamente desde la configuración -->
+					</tr>
+				</thead>
+				<tbody>
+					<!-- Los datos se cargan dinámicamente vía AJAX -->
+				</tbody>
+			</table>
+			<small class="text-muted">
+				<i class="fas fa-info-circle"></i>
+				${descripcion}
+			</small>
+		`;
+	}
 
-            ${this.generarFooter()}
-        `;
-    }
+	// Generar HTML de tabla simple
+	generarTablaSimpleHTML(tableId, modulo, moduloConfig) {
+		return `
+			<table id="${tableId}" 
+				   class="table table-hover mb-0"
+				   data-toggle="table"
+				   data-pagination="true"
+				   data-search="true"
+				   data-show-refresh="false"
+				   data-show-columns="true"
+				   data-page-size="15">
+				<thead>
+					<tr></tr>
+				</thead>
+				<tbody></tbody>
+			</table>
+		`;
+	}
+
+	// Generar HTML de contenido de módulo
+	generarContenidoModuloHTML(modulo, moduloConfig, tableId) {
+		return `
+			<div class="d-flex justify-content-between align-items-center mb-3">
+				<h4 class="mb-0 d-flex align-items-center">
+					<i class="${moduloConfig.icono} me-2 text-primary"></i>
+					${moduloConfig.plural}
+				</h4>
+				<div class="btn-group" role="group">
+					<button class="btn btn-primary btn-sm" onclick="abrirModal('${modulo}')">
+						<i class="fas fa-plus"></i>
+						Nuevo
+					</button>
+					<button class="btn btn-outline-secondary btn-sm" onclick="recargarTabla('${tableId}')">
+						<i class="fas fa-sync-alt"></i>
+					</button>
+				</div>
+			</div>
+			
+			<div class="card shadow-sm">
+				<div class="card-body p-0">
+					${this.generarTablaSimpleHTML(tableId, modulo, moduloConfig)}
+				</div>
+			</div>
+		`;
+	}
+
+	// Generar menú lateral
+	// En generarMenuLateral, cambia el onclick:
+	generarMenuLateral() {
+		const modulos = Object.keys(this.config.modulos);
+		let menuHTML = '';
+		
+		modulos.forEach((modulo, index) => {
+			const moduloConfig = this.config.modulos[modulo];
+			const activeClass = index === 0 ? 'active' : '';
+			
+			menuHTML += `
+				<a href="#" class="list-group-item list-group-item-action ${activeClass}" 
+				   data-modulo="${modulo}"
+				   onclick="cargarModuloMenu('${modulo}'); return false;">
+					<i class="${moduloConfig.icono || 'fas fa-cube'} me-2"></i>
+					<span>${moduloConfig.plural}</span>
+				</a>
+			`;
+		});
+		
+		return menuHTML;
+	}
 	
 	// Generar menú vertical de módulos
 	generarMenuVertical() {
@@ -574,8 +722,7 @@ class GeneradorHTML {
 	}
 
     // Inyectar aplicación completa en el contenedor principal
-    // En generador-html.js, mejora el método inyectarAplicacionCompleta
-	inyectarAplicacionCompleta(containerId = 'app-container') {
+    inyectarAplicacionCompleta(containerId = 'app-container') {
 		const container = document.getElementById(containerId);
 		
 		if (!container) {
@@ -658,24 +805,6 @@ class GeneradorHTML {
         }
     }
 
-    // Generar solo las pestañas (para reemplazo parcial)
-    inyectarPestanas(containerId = 'pestanas-container') {
-        const container = document.getElementById(containerId);
-        if (container) {
-            container.innerHTML = this.generarPestanas();
-            console.log('✅ Pestañas inyectadas');
-        }
-    }
-
-    // Generar solo el contenido (para reemplazo parcial)
-    inyectarContenido(containerId = 'contenido-container') {
-        const container = document.getElementById(containerId);
-        if (container) {
-            container.innerHTML = this.generarContenidoPestanas();
-            console.log('✅ Contenido inyectado');
-        }
-    }
-
     // Inyectar modal si no existe
     inyectarModalSiNoExiste() {
         if (!document.getElementById('modalGenerico')) {
@@ -728,18 +857,7 @@ class GeneradorHTML {
         console.log('✅ Estilos dinámicos aplicados');
     }
 
-    // ===== MÉTODOS DE DEBUG Y VALIDACIÓN =====
-
-    // Debug completo
-    debug() {
-        console.group('🏗️ GeneradorHTML - Debug Completo');
-        console.log('📊 Configuración:', this.config);
-        console.log('📋 Módulos disponibles:', Object.keys(this.config.modulos));
-        console.log('🎨 Branding:', this.config.branding);
-        console.log('🔧 UI:', this.config.ui);
-        console.log('📝 Textos:', this.config.textos);
-        console.groupEnd();
-    }
+    // ===== MÉTODOS DE VALIDACIÓN =====
 
     // Validar configuración completa
     validarConfiguracion() {
@@ -770,29 +888,6 @@ class GeneradorHTML {
         }
         
         console.log('✅ Configuración completamente válida');
-        return true;
-    }
-
-    // Validar que todos los módulos tengan la configuración necesaria
-    validarModulos() {
-        const errores = [];
-        
-        Object.keys(this.config.modulos).forEach(modulo => {
-            const moduloConfig = this.config.modulos[modulo];
-            
-            if (!moduloConfig.singular) errores.push(`${modulo}: falta 'singular'`);
-            if (!moduloConfig.plural) errores.push(`${modulo}: falta 'plural'`);
-            if (!moduloConfig.columnasTablas || !Array.isArray(moduloConfig.columnasTablas)) {
-                errores.push(`${modulo}: 'columnasTablas' inválida`);
-            }
-        });
-
-        if (errores.length > 0) {
-            console.warn('⚠️ Errores de validación:', errores);
-            return false;
-        }
-        
-        console.log('✅ Todos los módulos son válidos');
         return true;
     }
 }
@@ -838,122 +933,6 @@ function intentarInicializar() {
     } catch (error) {
         console.error('❌ Error inicializando GeneradorHTML:', error);
         return false;
-    }
-}
-
-// Función para cargar un módulo desde el menú vertical
-function cargarModulo(modulo, tabId) {
-    console.log(`📂 Cargando módulo: ${modulo}, tabId: ${tabId}`);
-    
-    // Actualizar título del módulo
-    const tituloModulo = document.getElementById('titulo-modulo-actual');
-    const moduloConfig = CONFIGURACION_SISTEMA.modulos[modulo];
-    
-    if (tituloModulo && moduloConfig) {
-        tituloModulo.innerHTML = `
-            <i class="${moduloConfig.icono || 'fas fa-cube'} me-2 text-primary"></i>
-            ${moduloConfig.plural}
-            <small class="text-muted ms-2">${moduloConfig.descripcion || ''}</small>
-        `;
-    }
-    
-    // Remover active de todos los items del menú
-    document.querySelectorAll('.list-group-item').forEach(item => {
-        item.classList.remove('active');
-    });
-    
-    // Activar el item seleccionado
-    const itemActivo = document.querySelector(`[data-modulo="${modulo}"]`);
-    if (itemActivo) {
-        itemActivo.classList.add('active');
-    }
-    
-    // Generar contenido del módulo
-    const contenidoModulo = document.getElementById('contenido-modulo');
-    if (contenidoModulo) {
-        const tableId = generarTableId(modulo);
-        
-        contenidoModulo.innerHTML = `
-            <!-- Header de acciones -->
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h6 class="mb-0">Gestión de ${moduloConfig.plural.toLowerCase()}</h6>
-                <div class="d-flex gap-2">
-                    <button type="button" 
-                            class="btn btn-primary btn-sm"
-                            onclick="abrirModal('${modulo}')">
-                        <i class="fas fa-plus me-1"></i>
-                        Nuevo ${moduloConfig.singular}
-                    </button>
-                    <button type="button" 
-                            class="btn btn-outline-secondary btn-sm"
-                            onclick="recargarTablaActual()">
-                        <i class="fas fa-sync-alt me-1"></i>
-                        Actualizar
-                    </button>
-                </div>
-            </div>
-            
-            <!-- Tabla -->
-            <div class="table-responsive">
-                ${generarEstructuraTabla(tableId, modulo, moduloConfig)}
-            </div>
-        `;
-        
-        // Inicializar la tabla si no existe
-        setTimeout(() => {
-            if (window.tableManager && !window.tableManager.tables[tableId]) {
-                const columnasConfig = window.configManager ? 
-                    window.configManager.getColumnasConfig(modulo) : 
-                    (window.columnasConfig && window.columnasConfig[modulo]);
-                
-                if (columnasConfig) {
-                    window.tableManager.inicializarTabla(tableId, modulo, columnasConfig);
-                    window.tableManager.cargarTabla(tableId);
-                }
-            } else if (window.tableManager && window.tableManager.tables[tableId]) {
-                window.tableManager.cargarTabla(tableId);
-            }
-        }, 100);
-    }
-}
-
-// Generar estructura de tabla HTML
-function generarEstructuraTabla(tableId, modulo, moduloConfig) {
-    return `
-        <table id="${tableId}" 
-               class="table table-striped table-hover"
-               data-toggle="table"
-               data-pagination="true"
-               data-search="true"
-               data-show-refresh="true"
-               data-show-columns="true"
-               data-sort-name="id"
-               data-sort-order="desc"
-               data-page-size="10"
-               data-page-list="[10, 25, 50, 100]">
-            <thead class="table-dark">
-                <tr>
-                    <!-- Las columnas se generan dinámicamente -->
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Los datos se cargan dinámicamente -->
-            </tbody>
-        </table>
-    `;
-}
-
-// Función para recargar tabla actual
-function recargarTablaActual() {
-    const itemActivo = document.querySelector('.list-group-item.active');
-    if (itemActivo) {
-        const modulo = itemActivo.getAttribute('data-modulo');
-        const tableId = generarTableId(modulo);
-        
-        if (window.tableManager && window.tableManager.tables[tableId]) {
-            window.tableManager.cargarTabla(tableId);
-            mostrarNotificacion('Tabla actualizada', 'success');
-        }
     }
 }
 

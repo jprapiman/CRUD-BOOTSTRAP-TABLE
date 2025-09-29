@@ -115,39 +115,7 @@ class SistemaNotificaciones {
 
     // Crear elemento HTML de la notificación
     crearElementoNotificacion(notificacion) {
-        const textos = CONFIGURACION_SISTEMA?.textos?.botones || { cerrar: 'Cerrar' };
-        
-        return `
-            <div id="notificacion-${notificacion.id}" 
-                 class="alert ${notificacion.clase} alert-dismissible fade show mb-2" 
-                 role="alert"
-                 data-tipo="${notificacion.tipo}">
-                
-                <div class="d-flex align-items-start">
-                    <div class="me-2">
-                        <i class="fas ${notificacion.icono}"></i>
-                    </div>
-                    
-                    <div class="flex-grow-1">
-                        ${notificacion.titulo ? `<strong>${notificacion.titulo}:</strong> ` : ''}
-                        <span class="notificacion-mensaje">${notificacion.mensaje}</span>
-                        
-                        ${this.config.mostrarTimestamp ? `
-                            <small class="d-block text-muted mt-1">
-                                ${notificacion.timestamp.toLocaleTimeString()}
-                            </small>
-                        ` : ''}
-                    </div>
-                    
-                    <button type="button" 
-                            class="btn-close" 
-                            data-bs-dismiss="alert" 
-                            aria-label="${textos.cerrar}"
-                            onclick="sistemaNotificaciones.cerrar('${notificacion.id}')">
-                    </button>
-                </div>
-            </div>
-        `;
+        return window.generadorHTML.generarNotificacionHTML(notificacion);
     }
 
     // Aplicar animación de entrada
@@ -260,34 +228,8 @@ class SistemaNotificaciones {
     // Notificación de confirmación con botones
     confirmacion(mensaje, opciones = {}) {
         const notificacionId = this.generarId();
-        const textos = CONFIGURACION_SISTEMA?.textos?.botones || {};
         
-        const notificacionHTML = `
-            <div id="notificacion-${notificacionId}" 
-                 class="alert alert-warning alert-dismissible fade show mb-2" 
-                 role="alert">
-                
-                <div class="d-flex align-items-center">
-                    <i class="fas fa-question-circle me-2"></i>
-                    <span class="flex-grow-1">${mensaje}</span>
-                    
-                    <div class="btn-group ms-2" role="group">
-                        <button type="button" 
-                                class="btn btn-sm btn-success" 
-                                onclick="sistemaNotificaciones.confirmar('${notificacionId}', true)">
-                            <i class="fas fa-check"></i>
-                            ${textos.si || 'Sí'}
-                        </button>
-                        <button type="button" 
-                                class="btn btn-sm btn-secondary" 
-                                onclick="sistemaNotificaciones.confirmar('${notificacionId}', false)">
-                            <i class="fas fa-times"></i>
-                            ${textos.no || 'No'}
-                        </button>
-                    </div>
-                </div>
-            </div>
-        `;
+        const notificacionHTML = window.generadorHTML.generarConfirmacionHTML(notificacionId, mensaje);
 
         const container = document.getElementById(this.containerId);
         if (container) {
@@ -332,15 +274,6 @@ class SistemaNotificaciones {
                 return acc;
             }, {})
         };
-    }
-
-    // Debug
-    debug() {
-        console.group('📢 Sistema de Notificaciones - Debug');
-        console.log('⚙️ Configuración:', this.config);
-        console.log('📊 Estadísticas:', this.obtenerEstadisticas());
-        console.log('📋 Notificaciones activas:', this.notificacionesActivas);
-        console.groupEnd();
     }
 }
 
@@ -392,20 +325,3 @@ document.addEventListener('DOMContentLoaded', function() {
     
     console.log('✅ Sistema de notificaciones configurables inicializado');
 });
-
-
-// Función para verificar estado
-function verificarEstadoNotificaciones() {
-    console.group('🔔 Estado del Sistema de Notificaciones');
-    console.log('Instancia:', window.sistemaNotificaciones);
-    console.log('Configuración:', window.sistemaNotificaciones ? window.sistemaNotificaciones.config : 'No disponible');
-    console.log('Container:', document.getElementById('notificaciones'));
-    console.log('Funciones globales:');
-    console.log('- mostrarNotificacion:', typeof window.mostrarNotificacion);
-    console.log('- mostrarExito:', typeof window.mostrarExito);
-    console.log('- mostrarError:', typeof window.mostrarError);
-    console.groupEnd();
-}
-
-// Ejecutar verificación después de 2 segundos
-setTimeout(verificarEstadoNotificaciones, 2000);

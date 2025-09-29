@@ -378,22 +378,6 @@ class SistemaValidacion {
 
         return resultado;
     }
-
-    // Debug y estadísticas
-    debug() {
-        console.group('✅ Sistema de Validación - Debug');
-        console.log('⚙️ Configuración:', this.config);
-        console.log('🔧 Validaciones personalizadas:', Object.keys(this.validacionesPersonalizadas));
-        console.groupEnd();
-    }
-
-    obtenerEstadisticas() {
-        return {
-            validacionesGlobales: Object.keys(this.config.globales).length,
-            modulosConValidacion: Object.keys(this.config.porModulo).length,
-            validacionesPersonalizadas: Object.keys(this.validacionesPersonalizadas).length
-        };
-    }
 }
 
 // Funciones globales de conveniencia

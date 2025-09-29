@@ -626,21 +626,35 @@ const CONFIGURACION_SISTEMA = {
 	
 	// En CONFIGURACION_SISTEMA, agrega esta sección después de 'modulos':
 	mapeos: {
-		// Mapeo de módulos a IDs de pestañas
+		// Mapeo de módulos a IDs de pestañas (completo pero opcional)
 		moduloToTabId: {
+			'categorias': 'categorias',
+			'productos': 'productos', 
+			'usuarios': 'usuarios',
+			'proveedores': 'proveedores',
+			'bodegas': 'bodegas',
+			'cajas': 'cajas',
+			'estados': 'estados',
 			'tipos_documento': 'tipos-documento',
-			'tipos_promocion': 'tipos-promocion', 
+			'tipos_promocion': 'tipos-promocion',
 			'metodos_pago': 'metodos-pago'
 		},
 		
-		// Mapeo de módulos a IDs de tabla
+		// Mapeo de módulos a IDs de tabla (completo pero opcional)
 		moduloToTableId: {
+			'categorias': 'tablaCategorias',
+			'productos': 'tablaProductos',
+			'usuarios': 'tablaUsuarios', 
+			'proveedores': 'tablaProveedores',
+			'bodegas': 'tablaBodegas',
+			'cajas': 'tablaCajas',
+			'estados': 'tablaEstados',
 			'tipos_documento': 'tablaTiposDocumento',
-			'tipos_promocion': 'tablaTiposPromocion', 
+			'tipos_promocion': 'tablaTiposPromocion',
 			'metodos_pago': 'tablaMetodosPago'
 		},
 		
-		// Orden de aparición de pestañas (opcional)
+		// Orden de aparición de pestañas
 		ordenPestanas: [
 			'productos',
 			'categorias', 

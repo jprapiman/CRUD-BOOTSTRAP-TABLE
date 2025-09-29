@@ -25,28 +25,17 @@ class ModalManager {
     }
 
     // Obtener nombre legible del módulo
-    getNombreModulo(modulo) {
-        if (window.configManager) {
-            return window.configManager.getNombreModulo(modulo);
-        } else if (window.ConfigUtil) {
-            return window.ConfigUtil.getNombreSingular(modulo);
-        } else {
-            // Fallback básico
-            const nombres = {
-                categorias: 'Categoría',
-                productos: 'Producto',
-                usuarios: 'Usuario',
-                proveedores: 'Proveedor',
-                bodegas: 'Bodega',
-                cajas: 'Caja',
-                estados: 'Estado',
-                tipos_documento: 'Tipo de Documento',
-                tipos_promocion: 'Tipo de Promoción',
-                metodos_pago: 'Método de Pago'
-            };
-            return nombres[modulo] || modulo;
-        }
-    }
+    // En getNombreModulo, eliminar el fallback hardcodeado:
+	getNombreModulo(modulo) {
+		if (window.configManager) {
+			return window.configManager.getNombreModulo(modulo);
+		} else if (window.ConfigUtil) {
+			return window.ConfigUtil.getNombreSingular(modulo);
+		} else {
+			// ELIMINAR FALLBACK HARCODEADO - lanzar error
+			throw new Error(`ConfigManager no disponible para obtener nombre del módulo: ${modulo}`);
+		}
+	}
 
     // Obtener título de formulario
     getTituloFormulario(modulo, esEdicion = false, id = null) {
@@ -165,80 +154,13 @@ class ModalManager {
 
     // Generar HTML del formulario
     generarFormulario(camposConfig, datos = null) {
-        console.log('🏗️ Generando formulario con', camposConfig.length, 'campos');
-        
-        let html = '<form id="formModal">';
-        camposConfig.forEach(campo => {
-            html += this.generarCampo(campo, datos);
-        });
-        html += '</form>';
-        return html;
+        return window.generadorHTML.generarFormularioHTML(camposConfig, datos);
     }
 
     // Generar HTML para cada tipo de campo
-    // En modales.js, mejora el método generarCampo:
-	generarCampo(campo, datos) {
-		const valor = datos ? datos[campo.name] : '';
-		const requiredAttr = campo.required ? 'required' : '';
-		const readonlyAttr = campo.readonly ? 'readonly' : '';
-		const requiredClass = campo.required ? 'required' : '';
-		
-		let html = `<div class="mb-3">`;
-		html += `<label for="${campo.name}" class="form-label ${requiredClass}">${campo.label}</label>`;
-		
-		switch (campo.type) {
-			case 'text':
-			case 'email':
-			case 'tel':
-			case 'password':
-			case 'number':
-				html += `<input type="${campo.type}" class="form-control" id="${campo.name}" name="${campo.name}" 
-						 value="${valor || ''}" ${requiredAttr} ${readonlyAttr}
-						 placeholder="${campo.placeholder || ''}"
-						 ${campo.min ? `min="${campo.min}"` : ''} ${campo.step ? `step="${campo.step}"` : ''}>`;
-				break;
-				
-			case 'textarea':
-				html += `<textarea class="form-control" id="${campo.name}" name="${campo.name}" 
-						 rows="4" ${requiredAttr} ${readonlyAttr} placeholder="${campo.placeholder || ''}">${valor || ''}</textarea>`;
-				break;
-				
-			case 'select':
-				html += `<select class="form-select" id="${campo.name}" name="${campo.name}" ${requiredAttr} ${readonlyAttr}>`;
-				html += `<option value="">Seleccione...</option>`;
-				(campo.options || []).forEach(opt => {
-					const selected = valor == opt.value ? 'selected' : '';
-					html += `<option value="${opt.value}" ${selected}>${opt.text}</option>`;
-				});
-				html += `</select>`;
-				break;
-				
-			case 'select-multiple':
-				html += `<select class="form-select" id="${campo.name}" name="${campo.name}" multiple ${requiredAttr}>`;
-				(campo.options || []).forEach(opt => {
-					const selected = datos && datos.categorias && datos.categorias.includes(opt.text) ? 'selected' : '';
-					html += `<option value="${opt.value}" ${selected}>${opt.text}</option>`;
-				});
-				html += `</select>`;
-				html += `<div class="form-text">Mantén presionada la tecla Ctrl para seleccionar múltiples opciones</div>`;
-				break;
-				
-			case 'checkbox':
-				const checked = datos ? (valor ? 'checked' : '') : (campo.checked ? 'checked' : '');
-				html += `<div class="form-check">`;
-				html += `<input class="form-check-input" type="checkbox" id="${campo.name}" name="${campo.name}" ${checked}>`;
-				html += `<label class="form-check-label" for="${campo.name}">${campo.label}</label>`;
-				html += `</div>`;
-				break;
-		}
-		
-		if (campo.placeholder && campo.type !== 'checkbox') {
-			html += `<div class="form-text">${campo.placeholder}</div>`;
-		}
-		
-		html += `</div>`;
-		return html;
-	}
+    generarCampo(campo, datos) {
+        return window.generadorHTML.generarCampoFormularioHTML(campo, datos);
+    }
 
     // Mostrar el modal con el contenido
     mostrarModal(titulo, contenido) {
@@ -265,134 +187,131 @@ class ModalManager {
     }
 
     // Guardar o actualizar registro
-	// En la clase ModalManager, mejora guardarRegistro:
-	// En el método guardarRegistro, mejora la parte del loading:
-	async guardarRegistro() {
-		const formData = this.obtenerDatosFormulario();
-		
-		console.log('💾 Operación:', this.currentId ? 'ACTUALIZAR' : 'CREAR');
-		
-		if (!this.validarFormulario(formData)) {
-			return;
-		}
-		
-		const botonGuardar = $('#modalGenericoGuardar');
-		const textoOriginal = botonGuardar.html();
-		
-		try {
-			// Mostrar loading con estilo mejorado
-			botonGuardar.html(`
-				<i class="fas fa-spinner fa-spin me-1"></i>
-				${this.currentId ? 'Actualizando...' : 'Guardando...'}
-			`).prop('disabled', true).addClass('btn-loading');
-			
-			let resultado;
-			if (this.currentId) {
-				resultado = await this.api.actualizar(this.currentModulo, this.currentId, formData);
-				mostrarNotificacion('Registro actualizado correctamente', 'success');
-			} else {
-				resultado = await this.api.crear(this.currentModulo, formData);
-				mostrarNotificacion('Registro creado correctamente', 'success');
-			}
-			
-			this.modalElement.modal('hide');
-			this.tableManager.refrescarTablaActual();
-			
-		} catch (error) {
-			console.error('❌ Error guardando registro:', error);
-			// ... manejo de errores existente
-		} finally {
-			// Restaurar botón con mejor estilo
-			botonGuardar.html(`
-				<i class="${this.currentId ? 'fas fa-save' : 'fas fa-plus'} me-1"></i>
-				${this.currentId ? 'Actualizar' : 'Guardar'}
-			`).prop('disabled', false).removeClass('btn-loading');
-		}
-	}
+    async guardarRegistro() {
+        const formData = this.obtenerDatosFormulario();
+        
+        console.log('💾 Operación:', this.currentId ? 'ACTUALIZAR' : 'CREAR');
+        
+        if (!this.validarFormulario(formData)) {
+            return;
+        }
+        
+        const botonGuardar = $('#modalGenericoGuardar');
+        const textoOriginal = botonGuardar.html();
+        
+        try {
+            // Mostrar loading con estilo mejorado
+            botonGuardar.html(`
+                <i class="fas fa-spinner fa-spin me-1"></i>
+                ${this.currentId ? 'Actualizando...' : 'Guardando...'}
+            `).prop('disabled', true).addClass('btn-loading');
+            
+            let resultado;
+            if (this.currentId) {
+                resultado = await this.api.actualizar(this.currentModulo, this.currentId, formData);
+                mostrarNotificacion('Registro actualizado correctamente', 'success');
+            } else {
+                resultado = await this.api.crear(this.currentModulo, formData);
+                mostrarNotificacion('Registro creado correctamente', 'success');
+            }
+            
+            this.modalElement.modal('hide');
+            this.tableManager.refrescarTablaActual();
+            
+        } catch (error) {
+            console.error('❌ Error guardando registro:', error);
+            mostrarNotificacion('Error al guardar el registro: ' + error.message, 'error');
+        } finally {
+            // Restaurar botón con mejor estilo
+            botonGuardar.html(`
+                <i class="${this.currentId ? 'fas fa-save' : 'fas fa-plus'} me-1"></i>
+                ${this.currentId ? 'Actualizar' : 'Guardar'}
+            `).prop('disabled', false).removeClass('btn-loading');
+        }
+    }
 
     // Obtener datos del formulario
-    // En la clase ModalManager, mejora el método obtenerDatosFormulario:
-	obtenerDatosFormulario() {
-		const formData = {};
-		const camposConfig = this.getCamposConfig(this.currentModulo);
-		
-		console.log('📋 Procesando campos para:', this.currentModulo, this.currentId ? 'ACTUALIZACIÓN' : 'CREACIÓN');
-		
-		camposConfig.forEach(campo => {
-			// EXCLUIR CAMPOS PROBLEMÁTICOS SEGÚN MÓDULO Y OPERACIÓN
-			const excluir = this.debeExcluirCampo(campo.name, this.currentModulo, this.currentId);
-			if (excluir) {
-				console.log(`🚫 Excluyendo campo: ${campo.name} - ${excluir}`);
-				return;
-			}
-			
-			const element = $(`#${campo.name}`);
-			
-			if (element.length === 0) {
-				console.warn('⚠️ Elemento no encontrado:', campo.name);
-				return;
-			}
-			
-			if (campo.type === 'checkbox') {
-				formData[campo.name] = element.is(':checked');
-			} else if (campo.type === 'select-multiple') {
-				formData[campo.name] = element.val() ? element.val().join(',') : '';
-			} else {
-				formData[campo.name] = element.val();
-			}
-		});
-		
-		console.log('📤 FormData final:', formData);
-		return formData;
-	}
+    obtenerDatosFormulario() {
+        const formData = {};
+        const camposConfig = this.getCamposConfig(this.currentModulo);
+        
+        console.log('📋 Procesando campos para:', this.currentModulo, this.currentId ? 'ACTUALIZACIÓN' : 'CREACIÓN');
+        
+        camposConfig.forEach(campo => {
+            // EXCLUIR CAMPOS PROBLEMÁTICOS SEGÚN MÓDULO Y OPERACIÓN
+            const excluir = this.debeExcluirCampo(campo.name, this.currentModulo, this.currentId);
+            if (excluir) {
+                console.log(`🚫 Excluyendo campo: ${campo.name} - ${excluir}`);
+                return;
+            }
+            
+            const element = $(`#${campo.name}`);
+            
+            if (element.length === 0) {
+                console.warn('⚠️ Elemento no encontrado:', campo.name);
+                return;
+            }
+            
+            if (campo.type === 'checkbox') {
+                formData[campo.name] = element.is(':checked');
+            } else if (campo.type === 'select-multiple') {
+                formData[campo.name] = element.val() ? element.val().join(',') : '';
+            } else {
+                formData[campo.name] = element.val();
+            }
+        });
+        
+        console.log('📤 FormData final:', formData);
+        return formData;
+    }
 
-	// Nuevo método para determinar qué campos excluir
-	debeExcluirCampo(nombreCampo, modulo, esEdicion) {
-		const exclusiones = {
-			// Para todos los módulos en actualización
-			'*': {
-				actualizacion: ['created_at', 'updated_at', 'password'] // Campos que nunca se deben actualizar
-			},
-			// Exclusiones específicas por módulo
-			'productos': {
-				creacion: [],
-				actualizacion: ['categoria_ids', 'stock_actual', 'stock_minimo']
-			},
-			'usuarios': {
-				creacion: [],
-				actualizacion: ['password'] // No actualizar password a menos que se cambie explícitamente
-			},
-			'tipos_documento': {
-				creacion: [],
-				actualizacion: ['correlativo_actual'] // No permitir modificar el correlativo en actualización
-			},
-			'tipos_promocion': {
-				creacion: [],
-				actualizacion: []
-			},
-			'metodos_pago': {
-				creacion: [],
-				actualizacion: []
-			}
-		};
-		
-		// Verificar exclusiones globales
-		if (esEdicion && exclusiones['*'].actualizacion.includes(nombreCampo)) {
-			return 'Exclusión global para actualización';
-		}
-		
-		// Verificar exclusiones específicas del módulo
-		if (exclusiones[modulo]) {
-			if (esEdicion && exclusiones[modulo].actualizacion.includes(nombreCampo)) {
-				return `Exclusión específica para actualización en ${modulo}`;
-			}
-			if (!esEdicion && exclusiones[modulo].creacion.includes(nombreCampo)) {
-				return `Exclusión específica para creación en ${modulo}`;
-			}
-		}
-		
-		return false;
-	}
+    // Nuevo método para determinar qué campos excluir
+    debeExcluirCampo(nombreCampo, modulo, esEdicion) {
+        const exclusiones = {
+            // Para todos los módulos en actualización
+            '*': {
+                actualizacion: ['created_at', 'updated_at', 'password']
+            },
+            // Exclusiones específicas por módulo
+            'productos': {
+                creacion: [],
+                actualizacion: ['categoria_ids', 'stock_actual', 'stock_minimo']
+            },
+            'usuarios': {
+                creacion: [],
+                actualizacion: ['password']
+            },
+            'tipos_documento': {
+                creacion: [],
+                actualizacion: ['correlativo_actual']
+            },
+            'tipos_promocion': {
+                creacion: [],
+                actualizacion: []
+            },
+            'metodos_pago': {
+                creacion: [],
+                actualizacion: []
+            }
+        };
+        
+        // Verificar exclusiones globales
+        if (esEdicion && exclusiones['*'].actualizacion.includes(nombreCampo)) {
+            return 'Exclusión global para actualización';
+        }
+        
+        // Verificar exclusiones específicas del módulo
+        if (exclusiones[modulo]) {
+            if (esEdicion && exclusiones[modulo].actualizacion.includes(nombreCampo)) {
+                return `Exclusión específica para actualización en ${modulo}`;
+            }
+            if (!esEdicion && exclusiones[modulo].creacion.includes(nombreCampo)) {
+                return `Exclusión específica para creación en ${modulo}`;
+            }
+        }
+        
+        return false;
+    }
 
     // Validar formulario
     validarFormulario(formData) {

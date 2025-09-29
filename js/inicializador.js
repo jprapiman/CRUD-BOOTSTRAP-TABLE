@@ -4,26 +4,23 @@ class CargadorScripts {
     constructor() {
         this.scriptsConfig = {
             // Orden específico de carga - CRÍTICO MANTENER ESTE ORDEN
-            // En la sección scriptsConfig, cambia el orden:
-			scripts: [
+            scripts: [
 				// 1. Configuración (debe cargarse primero)
 				'js/configuracion-completa.js',
-				'js/config-util.js', 
 				'js/config-manager.js',
-							
-				// 2. Sistemas de UI (notificaciones antes que app)
+				'js/config-validaciones.js', // NUEVO
+				
+				// 2. Sistemas de UI
 				'js/notificaciones.js',
-				// 2. Core de la aplicación
+				
+				// 3. Core de la aplicación
 				'js/app.js',
 				
-				// 3. Sistemas de UI
+				// 4. Sistemas de UI adicionales
 				'js/validador.js',
 				'js/generador-html.js',
 				'js/modales.js'
 			],
-            
-            // Scripts opcionales que se pueden cargar en paralelo
-            opcionales: [],
             
             // Configuración de carga
             timeout: 30000, // 30 segundos timeout por script
@@ -212,8 +209,8 @@ class CargadorScripts {
         console.log('✅ Eventos configurados');
     }
 
-    // Manejar estructura generada
-    // En inicializador.js, mejora el manejo de la estructura generada
+    // Manejar estructura generada// En el método manejarEstructuraGenerada, reemplaza esta parte:
+	// En el método manejarEstructuraGenerada, reemplaza esta parte:
 	manejarEstructuraGenerada(event) {
 		if (this.estructuraGenerada) {
 			console.log('Aplicación ya inicializada, omitiendo...');
@@ -233,10 +230,22 @@ class CargadorScripts {
 					if (typeof inicializarSistema === 'function') {
 						console.log('🎯 Ejecutando inicializarSistema desde inicializador...');
 						inicializarSistema();
+						
+						// Cargar el primer módulo automáticamente después de que el sistema esté listo
+						setTimeout(() => {
+							console.log('🎯 Intentando cargar primer módulo...');
+							if (typeof cargarPrimerModulo === 'function') {
+								cargarPrimerModulo();
+							} else {
+								console.error('❌ cargarPrimerModulo no está definido');
+								// Intentar cargar el primer módulo manualmente
+								cargarPrimerModuloManual();
+							}
+						}, 1500);
 					} else {
 						console.error('❌ inicializarSistema no está disponible');
 					}
-				}, 1000);
+				}, 500);
 				
 			} catch (error) {
 				console.error('Error en inicialización completa:', error);
@@ -244,25 +253,28 @@ class CargadorScripts {
 			}
 		}, 200);
 	}
+
+
     // Ejecutar inicialización completa
     ejecutarInicializacionCompleta(detalles) {
-        // Mostrar notificación de éxito si está disponible
-        setTimeout(() => {
-            if (window.sistemaNotificaciones) {
-                window.sistemaNotificaciones.exito('Interfaz cargada dinámicamente');
-            }
-        }, 500);
-
-        // Ejecutar debug si está habilitado
-        if (this.debugHabilitado()) {
-            this.ejecutarDebug(detalles);
-        }
-
-        // Mostrar mensaje de bienvenida
-        this.mostrarMensajeBienvenida();
-
-        console.log('Inicialización completa finalizada correctamente');
-    }
+		// Validar mapeos completos (ahora más flexible)
+		if (window.ConfigValidaciones) {
+			const configValida = window.ConfigValidaciones.validarMapeosCompletos();
+			if (configValida) {
+				console.log('✅ Configuración validada correctamente');
+			}
+			
+			// Debug opcional de mapeos
+			if (window.location.hash === '#debug-mapeos') {
+				window.ConfigValidaciones.debugMapeos();
+			}
+		}
+		
+		// Resto del código...
+		this.mostrarMensajeBienvenida();
+		
+		console.log('Inicialización completa finalizada correctamente');
+	}
 
     // Verificar dependencias principales
     verificarDependenciasPrincipales() {
@@ -283,41 +295,11 @@ class CargadorScripts {
         };
     }
 
-    // Verificar si debug está habilitado
-    debugHabilitado() {
-        return window.location.hash.includes('debug') || 
-               window.location.search.includes('debug=true') ||
-               (CONFIGURACION_SISTEMA?.debug?.habilitado === true);
-    }
-
-    // Ejecutar debug completo
-    ejecutarDebug(detalles) {
-        console.group('Debug habilitado - Información completa');
-        console.log('📦 Scripts cargados:', this.scriptsExitosos);
-        console.log('❌ Scripts fallidos:', this.scriptsFallidos);
-        console.log('🏗️ Módulos generados:', detalles.modulos);
-        console.log('⚙️ ConfigManager:', window.configManager);
-        console.log('🎨 GeneradorHTML:', window.generadorHTML);
-        console.log('📢 Sistema Notificaciones:', window.sistemaNotificaciones);
-        console.log('✅ Sistema Validación:', window.sistemaValidacion);
-        console.log('🔗 API Client:', window.api);
-        console.log('📊 Table Manager:', window.tableManager);
-        console.log('🎯 Modal Manager:', window.modalManager);
-        console.groupEnd();
-
-        // Debug de cada componente si está disponible
-        ['configManager', 'generadorHTML', 'sistemaNotificaciones', 'sistemaValidacion'].forEach(componente => {
-            if (window[componente] && typeof window[componente].debug === 'function') {
-                window[componente].debug();
-            }
-        });
-    }
-
     // Mostrar mensaje de bienvenida
     mostrarMensajeBienvenida() {
         setTimeout(() => {
             console.log(
-                '%c🏪 Minimarket Manager cargado dinámicamente', 
+                '%c🏪 CRUD Manager cargado dinámicamente', 
                 'color: #0d6efd; font-size: 16px; font-weight: bold;'
             );
             
@@ -336,15 +318,6 @@ class CargadorScripts {
                 'color: #6f42c1; font-weight: bold;', 
                 this.scriptsExitosos.length
             );
-
-            // Información adicional para desarrollo
-            if (this.debugHabilitado()) {
-                console.log('%cModo debug activo - Funciones disponibles:', 'color: #ffc107; font-weight: bold;');
-                console.log('- debugApp() - Debug completo de la aplicación');
-                console.log('- recargarInterfaz() - Recargar interfaz dinámicamente');
-                console.log('- infoSistema() - Información del sistema');
-                console.log('- reiniciarApp() - Reiniciar aplicación');
-            }
         }, 2000);
     }
 
@@ -367,36 +340,19 @@ class CargadorScripts {
     }
 
     // Manejar error crítico
-    manejarErrorCritico(error) {
-        console.error('💥 ERROR CRÍTICO:', error);
-        
-        // Mostrar en UI básica si no hay notificaciones
-        if (!window.sistemaNotificaciones) {
-            alert(`Error crítico cargando la aplicación: ${error.message}`);
-        }
-
-        // Mostrar información de fallback
-        const contenedor = document.getElementById('app-container');
-        if (contenedor) {
-            contenedor.innerHTML = `
-                <div class="container mt-5">
-                    <div class="alert alert-danger" role="alert">
-                        <h4 class="alert-heading">Error Crítico</h4>
-                        <p>No se pudo cargar la aplicación completamente.</p>
-                        <hr>
-                        <p class="mb-0">
-                            <strong>Error:</strong> ${error.message}<br>
-                            <strong>Scripts cargados:</strong> ${this.scriptsExitosos.join(', ')}<br>
-                            <strong>Scripts fallidos:</strong> ${this.scriptsFallidos.map(f => f.src).join(', ')}
-                        </p>
-                        <button class="btn btn-outline-danger mt-3" onclick="location.reload()">
-                            <i class="fas fa-sync"></i> Recargar Página
-                        </button>
-                    </div>
-                </div>
-            `;
-        }
-    }
+	manejarErrorCritico(error) {
+		console.error('💥 ERROR CRÍTICO:', error);
+		
+		// Mostrar información de error usando GeneradorHTML
+		const contenedor = document.getElementById('app-container');
+		if (contenedor) {
+			contenedor.innerHTML = window.generadorHTML.generarErrorCriticoHTML(
+				error, 
+				this.scriptsExitosos, 
+				this.scriptsFallidos
+			);
+		}
+	}
 
     // Método para reinicializar
     async reinicializar() {
@@ -428,75 +384,11 @@ class CargadorScripts {
     }
 }
 
-// Funciones globales de utilidad
-function debugApp() {
-    console.group('🔍 Debug completo de la aplicación');
-    console.log('CargadorScripts:', window.cargadorScripts);
-    console.log('Estadísticas carga:', window.cargadorScripts?.getEstadisticas());
-    console.log('ConfigManager:', window.configManager);
-    console.log('GeneradorHTML:', window.generadorHTML);
-    console.log('Sistema Notificaciones:', window.sistemaNotificaciones);
-    console.log('Sistema Validación:', window.sistemaValidacion);
-    console.log('API Client:', window.api);
-    console.log('Table Manager:', window.tableManager);
-    console.log('Modal Manager:', window.modalManager);
-    console.groupEnd();
-}
-
-function recargarInterfaz() {
-    if (window.generadorHTML) {
-        console.log('🔄 Recargando interfaz dinámicamente...');
-        window.generadorHTML.inyectarEnDOM('app-container');
-        
-        if (window.sistemaNotificaciones) {
-            window.sistemaNotificaciones.info('Interfaz recargada');
-        }
-    } else {
-        console.error('GeneradorHTML no disponible para recargar');
-    }
-}
-
-function reiniciarApp() {
-    if (window.cargadorScripts) {
-        window.cargadorScripts.reinicializar();
-    } else {
-        console.error('CargadorScripts no disponible');
-        location.reload();
-    }
-}
-
-function infoSistema() {
-    const info = {
-        configuracion: window.CONFIGURACION_SISTEMA?.sistema || 'No disponible',
-        modulos: window.configManager ? 
-            window.configManager.getModulosConfigurados().length : 
-            'No disponible',
-        carga: window.cargadorScripts ? 
-            window.cargadorScripts.getEstadisticas() : 
-            'No disponible',
-        componentes: {
-            notificaciones: !!window.sistemaNotificaciones,
-            validacion: !!window.sistemaValidacion,
-            generadorHTML: !!window.generadorHTML,
-            api: !!window.api,
-            tableManager: !!window.tableManager,
-            modalManager: !!window.modalManager
-        }
-    };
-
-    console.table(info);
-    return info;
-}
-
 // Inicialización automática cuando se carga el script
 const cargadorScripts = new CargadorScripts();
 
 // Hacer disponible globalmente
 window.cargadorScripts = cargadorScripts;
-window.debugApp = debugApp;
-window.recargarInterfaz = recargarInterfaz;
-window.reiniciarApp = reiniciarApp;
-window.infoSistema = infoSistema;
 
 // Iniciar la carga automáticamente
 cargadorScripts.inicializar().then(() => {

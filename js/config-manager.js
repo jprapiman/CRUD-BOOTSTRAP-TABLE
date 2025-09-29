@@ -195,6 +195,22 @@ class ConfigManager {
     }
 
     // ===== MÉTODOS DE COMPATIBILIDAD =====
+
+	// Obtener todos los tabIds configurados
+	getTabIdsConfigurados() {
+		if (this.config.mapeos && this.config.mapeos.moduloToTabId) {
+			return Object.values(this.config.mapeos.moduloToTabId);
+		}
+		return this.getModulosConfigurados();
+	}
+
+	// Verificar si un tabId existe
+	existeTabId(tabId) {
+		if (this.config.mapeos && this.config.mapeos.moduloToTabId) {
+			return Object.values(this.config.mapeos.moduloToTabId).includes(tabId);
+		}
+		return this.getModulosConfigurados().includes(tabId);
+	}
     
     // Generar variables de compatibilidad con la estructura anterior
     generarCompatibilidad() {
@@ -228,7 +244,7 @@ class ConfigManager {
         return { nombresModulos, camposConfig, columnasConfig };
     }
 	
-	// En la clase ConfigManager, agrega este método:
+	// Convertir módulo a tabId
 	convertirModuloATabId(modulo) {
 		const moduloConfig = this.getModuloConfig(modulo);
 		if (!moduloConfig) {
@@ -246,24 +262,45 @@ class ConfigManager {
 		return mapaEspecial[modulo] || modulo;
 	}
 	
-	// En la clase ConfigManager, agrega estos métodos:
+	// En la clase ConfigManager, agregar:
 
-	// Obtener mapeo de módulo a tabId
+	// Obtener tabId (usando ConfigValidaciones si está disponible)
 	getTabIdPorModulo(modulo) {
+		if (window.ConfigValidaciones) {
+			return window.ConfigValidaciones.obtenerTabIdConfigurado(modulo);
+		}
+		
+		// Fallback si ConfigValidaciones no está disponible
 		if (this.config.mapeos && this.config.mapeos.moduloToTabId) {
 			return this.config.mapeos.moduloToTabId[modulo] || modulo;
 		}
-		return this.convertirModuloATabId(modulo);
+		return modulo;
 	}
 
-	// Obtener mapeo de módulo a tableId
+	// Obtener tableId (usando ConfigValidaciones si está disponible)
 	getTableIdPorModulo(modulo) {
+		if (window.ConfigValidaciones) {
+			return window.ConfigValidaciones.obtenerTableIdConfigurado(modulo);
+		}
+		
+		// Fallback si ConfigValidaciones no está disponible
 		if (this.config.mapeos && this.config.mapeos.moduloToTableId) {
-			return this.config.mapeos.moduloToTableId[modulo];
+			return this.config.mapeos.moduloToTableId[modulo] || `tabla${this.capitalize(modulo)}`;
 		}
 		return `tabla${this.capitalize(modulo)}`;
 	}
 
+	// Obtener módulo por tabId (reverse lookup mejorado)
+	getModuloPorTabId(tabId) {
+		if (this.config.mapeos && this.config.mapeos.moduloToTabId) {
+			const mapeos = this.config.mapeos.moduloToTabId;
+			const modulo = Object.keys(mapeos).find(mod => mapeos[mod] === tabId);
+			if (modulo) return modulo;
+		}
+		
+		// Si no se encuentra en mapeos explícitos, asumir que tabId = nombre módulo
+		return tabId;
+	}
 	// Obtener orden de pestañas
 	getOrdenPestanas() {
 		return this.config.mapeos?.ordenPestanas || this.getModulosConfigurados();
@@ -322,35 +359,3 @@ if (!intentarInicializarConfigManager()) {
         }
     }, 50);
 }
-
-
-
-function verificarConfiguracionMapeos() {
-    console.group('🔧 VERIFICACIÓN DE CONFIGURACIÓN DE MAPEOS');
-    
-    const modulos = window.configManager ? 
-        window.configManager.getModulosConfigurados() : 
-        Object.keys(CONFIGURACION_SISTEMA.modulos);
-    
-    console.log('📋 Módulos configurados:', modulos);
-    
-    modulos.forEach(modulo => {
-        const tabId = activarPestanaPorModulo.toString().includes('configManager') ?
-            window.configManager.getTabIdPorModulo(modulo) :
-            generarTableId(modulo);
-            
-        const tableId = generarTableId(modulo);
-        
-        console.log(`📦 ${modulo}:`, {
-            tabId: tabId,
-            tableId: tableId,
-            existeTab: !!document.getElementById(`${tabId}-tab`),
-            existeTable: !!document.getElementById(tableId)
-        });
-    });
-    
-    console.groupEnd();
-}
-
-// Ejecutar verificación después de 4 segundos
-setTimeout(verificarConfiguracionMapeos, 4000);

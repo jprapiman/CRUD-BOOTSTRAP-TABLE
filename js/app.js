@@ -63,123 +63,114 @@ class ApiClient {
 class TableManager {
     constructor(apiClient) {
         this.api = apiClient;
-        this.tables = {}; // Asegurar que se inicialice
+        this.tables = {};
         this.currentActiveTable = null;
         
         console.log('✅ TableManager inicializado, tables:', this.tables);
         
-        // Bind de métodos que se usan como callbacks
         this.manejarCambioPestana = this.manejarCambioPestana.bind(this);
         this.generarTableId = this.generarTableId.bind(this);
         this.intentarInicializarTabla = this.intentarInicializarTabla.bind(this);
     }
 
     inicializarTabla(tableId, modulo, columns) {
-		console.log(`🔄 Inicializando tabla ${tableId} para módulo ${modulo}`);
-		
-		try {
-			// Verificar que Bootstrap Table esté disponible
-			if (typeof $.fn.bootstrapTable === 'undefined') {
-				throw new Error('Bootstrap Table no está disponible');
-			}
+        console.log(`🔄 Inicializando tabla ${tableId} para módulo ${modulo}`);
+        
+        try {
+            if (typeof $.fn.bootstrapTable === 'undefined') {
+                throw new Error('Bootstrap Table no está disponible');
+            }
 
-			// Aplicar formateadores a las columnas
-			const columnsConFormatters = this.aplicarFormateadores(columns, modulo);
-			
-			this.tables[tableId] = {
-				modulo: modulo,
-				columns: columnsConFormatters,
-				dataLoaded: false
-			};
+            const columnsConFormatters = this.aplicarFormateadores(columns, modulo);
+            
+            this.tables[tableId] = {
+                modulo: modulo,
+                columns: columnsConFormatters,
+                dataLoaded: false
+            };
 
-			const tableElement = $(`#${tableId}`);
-			
-			// Destruir tabla existente si existe
-			if (tableElement.data('bootstrap.table')) {
-				tableElement.bootstrapTable('destroy');
-			}
+            const tableElement = $(`#${tableId}`);
+            
+            if (tableElement.data('bootstrap.table')) {
+                tableElement.bootstrapTable('destroy');
+            }
 
-			// DEFINIR tableConfig aquí (esto es lo que faltaba)
-			const tableConfig = {
-				url: `api/router.php`,
-				method: 'GET',
-				sidePagination: 'server',
-				pagination: true,
-				pageSize: 10,
-				pageList: [10, 25, 50, 100],
-				search: true,
-				showColumns: true,
-				showRefresh: true,
-				columns: columnsConFormatters,
-				queryParams: function(params) {
-					return {
-						module: modulo,
-						limit: params.limit,
-						offset: params.offset,
-						page: params.offset / params.limit + 1,
-						search: params.search,
-						sort: params.sort,
-						order: params.order
-					};
-				},
-				responseHandler: function(res) {
-					console.log(`📊 Respuesta recibida para ${tableId}:`, res);
-					if (res && res.success) {
-						return {
-							total: res.total || 0,
-							rows: res.data || []
-						};
-					}
-					console.warn(`⚠️ Respuesta sin éxito para ${tableId}:`, res);
-					return { total: 0, rows: [] };
-				},
-				onLoadSuccess: (data) => {
-					console.log(`✅ Datos cargados para tabla: ${tableId}`, data);
-					this.tables[tableId].dataLoaded = true;
-					
-					// Inicializar tooltips después de cargar los datos
-					setTimeout(() => {
-						this.inicializarTooltips();
-					}, 100);
-				},
-				onLoadError: (status, jqXHR) => {
-					console.error(`❌ Error cargando tabla ${tableId}:`, status, jqXHR);
-					if (window.mostrarNotificacion) {
-						window.mostrarNotificacion(`Error cargando datos para ${modulo}`, 'error');
-					}
-				},
-				onPostBody: () => {
-					console.log(`✅ Tabla ${tableId} renderizada correctamente`);
-				}
-			};
+            const tableConfig = {
+                url: `api/router.php`,
+                method: 'GET',
+                sidePagination: 'server',
+                pagination: true,
+                pageSize: 10,
+                pageList: [10, 25, 50, 100],
+                search: true,
+                showColumns: true,
+                showRefresh: true,
+                columns: columnsConFormatters,
+                queryParams: function(params) {
+                    return {
+                        module: modulo,
+                        limit: params.limit,
+                        offset: params.offset,
+                        page: params.offset / params.limit + 1,
+                        search: params.search,
+                        sort: params.sort,
+                        order: params.order
+                    };
+                },
+                responseHandler: function(res) {
+                    console.log(`📊 Respuesta recibida para ${tableId}:`, res);
+                    if (res && res.success) {
+                        return {
+                            total: res.total || 0,
+                            rows: res.data || []
+                        };
+                    }
+                    console.warn(`⚠️ Respuesta sin éxito para ${tableId}:`, res);
+                    return { total: 0, rows: [] };
+                },
+                onLoadSuccess: (data) => {
+                    console.log(`✅ Datos cargados para tabla: ${tableId}`, data);
+                    this.tables[tableId].dataLoaded = true;
+                    
+                    setTimeout(() => {
+                        this.inicializarTooltips();
+                    }, 100);
+                },
+                onLoadError: (status, jqXHR) => {
+                    console.error(`❌ Error cargando tabla ${tableId}:`, status, jqXHR);
+                    if (window.mostrarNotificacion) {
+                        window.mostrarNotificacion(`Error cargando datos para ${modulo}`, 'error');
+                    }
+                },
+                onPostBody: () => {
+                    console.log(`✅ Tabla ${tableId} renderizada correctamente`);
+                }
+            };
 
-			// Inicializar la tabla
-			tableElement.bootstrapTable(tableConfig);
-			console.log(`✅ Tabla ${tableId} inicializada correctamente`);
+            tableElement.bootstrapTable(tableConfig);
+            console.log(`✅ Tabla ${tableId} inicializada correctamente`);
 
-		} catch (error) {
-			console.error(`❌ Error crítico inicializando tabla ${tableId}:`, error);
-			this.mostrarErrorTabla(modulo, tableId, error.message);
-			throw error;
-		}
-	}
+        } catch (error) {
+            console.error(`❌ Error crítico inicializando tabla ${tableId}:`, error);
+            this.mostrarErrorTabla(modulo, tableId, error.message);
+            throw error;
+        }
+    }
 
-	// Agrega este método para inicializar tooltips
-	inicializarTooltips() {
-		if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
-			const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-			const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-				return new bootstrap.Tooltip(tooltipTriggerEl);
-			});
-			console.log(`✅ ${tooltipList.length} tooltips inicializados`);
-		}
-	}
+    inicializarTooltips() {
+        if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+            console.log(`✅ ${tooltipList.length} tooltips inicializados`);
+        }
+    }
 
     aplicarFormateadores(columns, modulo) {
         return columns.map(column => {
             const col = { ...column };
             
-            // Aplicar formateadores según el campo
             if (col.field === 'descripcion') {
                 col.formatter = (value) => this.descripcionFormatter(value);
             } else if (col.field === 'created_at') {
@@ -230,35 +221,27 @@ class TableManager {
         }
     }
 
-    // En la clase TableManager, modifica el método:
+    // En el método manejarCambioPestana, reemplazar:
+	// En manejarCambioPestana, simplificar:
 	manejarCambioPestana(tabId) {
 		console.log(`🔄 Cambiando a pestaña: ${tabId}`);
-		console.log('📊 Estado de tables:', this.tables);
 		
 		if (!this.tables) {
 			console.error('❌ this.tables no está definido en TableManager');
-			this.tables = {}; // Inicializar si es undefined
+			this.tables = {};
 		}
 		
-		// Mapeo correcto de IDs de pestañas a módulos
-		const moduloMap = {
-			'productos': 'productos',
-			'categorias': 'categorias', 
-			'usuarios': 'usuarios',
-			'proveedores': 'proveedores',
-			'bodegas': 'bodegas',
-			'cajas': 'cajas',
-			'estados': 'estados',
-			'tipos-documento': 'tipos_documento',
-			'tipos-promocion': 'tipos_promocion',
-			'metodos-pago': 'metodos_pago'
-		};
+		// USAR CONFIGMANAGER PARA OBTENER MÓDULO
+		let modulo;
+		if (window.configManager) {
+			modulo = window.configManager.getModuloPorTabId(tabId);
+		} else {
+			modulo = tabId; // Fallback mínimo
+		}
 		
-		const modulo = moduloMap[tabId] || tabId;
 		const tableId = this.generarTableId(modulo);
 		
 		console.log(`📋 Módulo: ${modulo}, TableID: ${tableId}`);
-		console.log('🔍 Tablas disponibles:', Object.keys(this.tables));
 		
 		if (this.tables[tableId]) {
 			console.log(`✅ Cargando tabla existente: ${tableId}`);
@@ -269,28 +252,20 @@ class TableManager {
 		}
 	}
 
-    // Nueva función para generar IDs de tabla consistentes
-    generarTableId(modulo) {
-        // Mapeo específico para casos especiales
-        const tableIdMap = {
-            'tipos_documento': 'tablaTiposDocumento',
-            'tipos_promocion': 'tablaTiposPromocion', 
-            'metodos_pago': 'tablaMetodosPago'
-        };
-        
-        if (tableIdMap[modulo]) {
-            return tableIdMap[modulo];
-        }
-        
-        // Para módulos regulares
-        return `tabla${this.capitalize(modulo)}`;
-    }
+	// En generarTableId, simplificar:
+	generarTableId(modulo) {
+		// USAR CONFIGMANAGER
+		if (window.configManager) {
+			return window.configManager.getTableIdPorModulo(modulo);
+		}
+		
+		// Fallback genérico
+		return `tabla${this.capitalize(modulo)}`;
+	}
 
-    // Función para intentar inicializar tabla faltante
     intentarInicializarTabla(modulo, tableId) {
         console.log(`Intentando inicializar tabla faltante: ${tableId} para módulo: ${modulo}`);
         
-        // Verificar si existe el elemento DOM
         const tableElement = document.getElementById(tableId);
         if (!tableElement) {
             console.error(`Elemento DOM no encontrado: ${tableId}`);
@@ -298,7 +273,6 @@ class TableManager {
             return false;
         }
         
-        // Obtener configuración de columnas
         let columnasConfig;
         
         if (window.configManager) {
@@ -319,7 +293,6 @@ class TableManager {
             console.log(`Inicializando tabla: ${tableId} con ${columnasConfig.length} columnas`);
             this.inicializarTabla(tableId, modulo, columnasConfig);
             
-            // Cargar datos inmediatamente
             setTimeout(() => {
                 this.cargarTabla(tableId);
             }, 100);
@@ -331,7 +304,6 @@ class TableManager {
         }
     }
 
-    // Función para mostrar error de tabla
     mostrarErrorTabla(modulo, tableId) {
         const container = document.querySelector(`#${tableId.replace('tabla', '').toLowerCase()}`);
         if (container) {
@@ -377,33 +349,32 @@ class TableManager {
             '<span class="badge bg-danger">Inactivo</span>';
     }
 
-    // En la clase TableManager, mejora el operateFormatter:
-	operateFormatter(row, modulo) {
-		const nombreModulo = window.configManager ? 
-			window.configManager.getNombreModulo(modulo) : 
-			modulo;
-		
-		return `
-			<div class="btn-group btn-group-sm" role="group" aria-label="Acciones para ${nombreModulo}">
-				<button type="button" 
-						class="btn btn-outline-warning" 
-						onclick="editar('${modulo}', ${row.id})" 
-						title="Editar ${nombreModulo}"
-						data-bs-toggle="tooltip"
-						data-bs-placement="top">
-					<i class="fas fa-edit fa-xs"></i>
-				</button>
-				<button type="button" 
-						class="btn btn-outline-danger" 
-						onclick="eliminar('${modulo}', ${row.id})" 
-						title="Eliminar ${nombreModulo}"
-						data-bs-toggle="tooltip"
-						data-bs-placement="top">
-					<i class="fas fa-trash fa-xs"></i>
-				</button>
-			</div>
-		`;
-	}
+    operateFormatter(row, modulo) {
+        const nombreModulo = window.configManager ? 
+            window.configManager.getNombreModulo(modulo) : 
+            modulo;
+        
+        return `
+            <div class="btn-group btn-group-sm" role="group" aria-label="Acciones para ${nombreModulo}">
+                <button type="button" 
+                        class="btn btn-outline-warning" 
+                        onclick="editar('${modulo}', ${row.id})" 
+                        title="Editar ${nombreModulo}"
+                        data-bs-toggle="tooltip"
+                        data-bs-placement="top">
+                    <i class="fas fa-edit fa-xs"></i>
+                </button>
+                <button type="button" 
+                        class="btn btn-outline-danger" 
+                        onclick="eliminar('${modulo}', ${row.id})" 
+                        title="Eliminar ${nombreModulo}"
+                        data-bs-toggle="tooltip"
+                        data-bs-placement="top">
+                    <i class="fas fa-trash fa-xs"></i>
+                </button>
+            </div>
+        `;
+    }
 
     ivaFormatter(value) {
         return value ? 
@@ -459,7 +430,7 @@ class TableManager {
             `<span class="badge bg-light text-dark me-1">${item}</span>`
         ).join('');
     }
-	
+    
     capitalize(str) {
         return str.split('_').map(word => 
             word.charAt(0).toUpperCase() + word.slice(1)
@@ -467,67 +438,29 @@ class TableManager {
     }
 }
 
+function verificarInicializacionTablas() {
+    console.log('🔍 Verificando inicialización de tablas...');
+    
+    if (!window.tableManager) {
+        console.error('❌ TableManager no disponible');
+        return false;
+    }
+    
+    const tablas = Object.keys(window.tableManager.tables);
+    console.log('📊 Tablas inicializadas:', tablas);
+    
+    if (typeof $.fn.bootstrapTable === 'undefined') {
+        console.error('❌ Bootstrap Table no está cargado');
+        return false;
+    }
+    
+    console.log('✅ Bootstrap Table disponible');
+    return true;
+}
 
-	// Función mejorada para verificar inicialización
-	function verificarInicializacionTablas() {
-		console.log('🔍 Verificando inicialización de tablas...');
-		
-		if (!window.tableManager) {
-			console.error('❌ TableManager no disponible');
-			return false;
-		}
-		
-		const tablas = Object.keys(window.tableManager.tables);
-		console.log('📊 Tablas inicializadas:', tablas);
-		
-		// Verificar que Bootstrap Table esté disponible
-		if (typeof $.fn.bootstrapTable === 'undefined') {
-			console.error('❌ Bootstrap Table no está cargado');
-			return false;
-		}
-		
-		console.log('✅ Bootstrap Table disponible');
-		return true;
-	}
-
-	// Función para forzar inicialización de tablas
-	
-	function forzarInicializacionTablas() {
-		
-		console.log('🔄 Forzando inicialización de tablas...');
-		
-		if (!window.tableManager) {
-			console.error('TableManager no disponible');
-			return;
-		}
-		
-		// Reinicializar todas las tablas
-		Object.keys(window.tableManager.tables).forEach(tableId => {
-			const tableConfig = window.tableManager.tables[tableId];
-			console.log(`🔄 Reinicializando tabla: ${tableId}`, tableConfig);
-			
-			const tableElement = $(`#${tableId}`);
-			if (tableElement.length) {
-				if (tableElement.bootstrapTable) {
-					tableElement.bootstrapTable('destroy');
-				}
-				
-				// Recrear la tabla con la configuración existente
-				window.tableManager.inicializarTabla(
-					tableId, 
-					tableConfig.modulo, 
-					tableConfig.columns
-				);
-			}
-		});
-	}
-
-// Función para mostrar notificaciones
-// REEMPLAZA la función mostrarNotificacion en app.js con esta versión:
 function mostrarNotificacion(mensaje, tipo = 'info') {
     console.log(`📢 Notificación [${tipo}]: ${mensaje}`);
     
-    // Usar el sistema de notificaciones si está disponible
     if (window.sistemaNotificaciones) {
         switch (tipo) {
             case 'success':
@@ -542,20 +475,14 @@ function mostrarNotificacion(mensaje, tipo = 'info') {
             default:
                 window.sistemaNotificaciones.info(mensaje);
         }
-    } 
-    // Si no hay sistema de notificaciones, usar fallback mejorado
-    else if (window.mostrarNotificacionPersonalizada) {
+    } else if (window.mostrarNotificacionPersonalizada) {
         window.mostrarNotificacionPersonalizada(mensaje, tipo);
-    }
-    // Último fallback: console.log
-    else {
+    } else {
         console.log(`[${tipo.toUpperCase()}] ${mensaje}`);
-        // Mostrar notificación básica con estilos
         mostrarNotificacionFallback(mensaje, tipo);
     }
 }
 
-// Función de fallback para notificaciones básicas
 function mostrarNotificacionFallback(mensaje, tipo = 'info') {
     const colores = {
         success: '#28a745',
@@ -571,7 +498,6 @@ function mostrarNotificacionFallback(mensaje, tipo = 'info') {
         info: 'ℹ️'
     };
     
-    // Crear elemento de notificación
     const notificacion = document.createElement('div');
     notificacion.style.cssText = `
         position: fixed;
@@ -599,7 +525,6 @@ function mostrarNotificacionFallback(mensaje, tipo = 'info') {
     
     document.body.appendChild(notificacion);
     
-    // Auto-remover después de 5 segundos
     setTimeout(() => {
         notificacion.style.animation = 'slideOutRight 0.3s ease-in';
         setTimeout(() => {
@@ -609,7 +534,6 @@ function mostrarNotificacionFallback(mensaje, tipo = 'info') {
         }, 300);
     }, 5000);
     
-    // Agregar estilos de animación si no existen
     if (!document.querySelector('#notificacion-styles')) {
         const styles = document.createElement('style');
         styles.id = 'notificacion-styles';
@@ -627,28 +551,22 @@ function mostrarNotificacionFallback(mensaje, tipo = 'info') {
     }
 }
 
-// Instancias globales
-// Instancias globales - crear inmediatamente
 console.log('Creando instancias globales...');
 window.api = new ApiClient();
 window.tableManager = new TableManager(window.api);
 
-// Referencias locales para compatibilidad
 let api = window.api;
 let tableManager = window.tableManager;
 
 console.log('API disponible:', !!window.api);
 console.log('TableManager disponible:', !!window.tableManager);
 
-
-
- function capitalize(str) {
-	return str.split('_').map(word => 
-		word.charAt(0).toUpperCase() + word.slice(1)
-	).join('');
+function capitalize(str) {
+    return str.split('_').map(word => 
+        word.charAt(0).toUpperCase() + word.slice(1)
+    ).join('');
 }
-// CORRECCIÓN: La función manejarCambioPestana global debe llamar al método del tableManager
-// CORRECCIÓN: Función global que llama al TableManager correctamente
+
 function manejarCambioPestana(pestanaId) {
     console.log('🌍 Función global manejarCambioPestana llamada con:', pestanaId);
     
@@ -657,10 +575,7 @@ function manejarCambioPestana(pestanaId) {
         window.tableManager.manejarCambioPestana(pestanaId);
     } else {
         console.error('❌ TableManager no disponible en función global');
-        console.log('🔍 window.tableManager:', window.tableManager);
-        console.log('🔍 window.api:', window.api);
         
-        // Intentar recrear TableManager si no existe
         if (window.api && !window.tableManager) {
             console.log('🔄 Recreando TableManager...');
             window.tableManager = new TableManager(window.api);
@@ -668,10 +583,80 @@ function manejarCambioPestana(pestanaId) {
     }
 }
 
+// ==== AGREGAR ESTA FUNCIÓN EN app.js ====
+// Colócala después de las clases y antes de inicializarSistema
+
+// Función para cargar el primer módulo automáticamente
+function cargarPrimerModulo() {
+    console.log('🎯 Cargando primer módulo automáticamente...');
+    
+    if (!window.configManager || !window.tableManager) {
+        console.error('❌ ConfigManager o TableManager no disponibles');
+        setTimeout(cargarPrimerModulo, 500); // Reintentar después de 500ms
+        return;
+    }
+    
+    const modulos = window.configManager.getModulosConfigurados();
+    if (modulos.length === 0) {
+        console.error('❌ No hay módulos configurados');
+        return;
+    }
+    
+    const primerModulo = modulos[0];
+    console.log(`📂 Cargando primer módulo: ${primerModulo}`);
+    
+    // Verificar si estamos usando la estructura con sidebar
+    const contenidoModulo = document.getElementById('contenido-modulo');
+    const sidebarItems = document.querySelectorAll('.list-group-item[data-modulo]');
+    
+    if (contenidoModulo && sidebarItems.length > 0) {
+        console.log('✅ Estructura con sidebar detectada');
+        // Estructura con sidebar - usar cargarModuloMenu
+        if (typeof cargarModuloMenu === 'function') {
+            // Activar el primer item del menú
+            const primerItem = document.querySelector('.list-group-item[data-modulo]');
+            if (primerItem) {
+                primerItem.classList.add('active');
+            }
+            cargarModuloMenu(primerModulo);
+        } else {
+            console.error('❌ cargarModuloMenu no está disponible');
+            // Fallback: simular click en el primer item
+            const primerItem = document.querySelector('.list-group-item[data-modulo]');
+            if (primerItem) {
+                primerItem.click();
+            }
+        }
+    } else {
+        console.log('ℹ️ Estructura con pestañas detectada');
+        // Estructura con pestañas - activar primera pestaña
+        const tabId = window.configManager ? 
+            window.configManager.convertirModuloATabId(primerModulo) : 
+            primerModulo;
+            
+        console.log(`🎯 Activando pestaña: ${tabId}`);
+        
+        const tabElement = document.getElementById(`${tabId}-tab`);
+        if (tabElement) {
+            tabElement.click();
+        } else {
+            console.error(`❌ No se encontró la pestaña: ${tabId}-tab`);
+            // Buscar cualquier pestaña disponible
+            const primeraTab = document.querySelector('.nav-link');
+            if (primeraTab) {
+                primeraTab.click();
+            }
+        }
+    }
+}
+
+// Hacer la función disponible globalmente
+window.cargarPrimerModulo = cargarPrimerModulo;
+
+
 function inicializarSistema() {
     console.log('🚀 Inicializando sistema con verificación mejorada...');
     
-    // Verificar que las instancias globales estén correctas
     if (!window.api) {
         console.error('❌ API no disponible, recreando...');
         window.api = new ApiClient();
@@ -688,7 +673,6 @@ function inicializarSistema() {
         tables: window.tableManager ? window.tableManager.tables : 'no tableManager'
     });
     
-    // Usar la nueva estructura de configuración
     let modulosConfig;
     
     if (window.configManager) {
@@ -713,7 +697,6 @@ function inicializarSistema() {
 
     console.log('📋 Inicializando tablas para módulos:', Object.keys(modulosConfig));
 
-    // Inicializar todas las tablas con verificación mejorada
     Object.keys(modulosConfig).forEach(modulo => {
         const tableId = window.tableManager.generarTableId(modulo);
         const tableElement = document.getElementById(tableId);
@@ -730,16 +713,9 @@ function inicializarSistema() {
             }
         } else {
             console.warn(`⚠️ Elemento DOM no encontrado: ${tableId}`);
-            
-            // Debug adicional
-            const todasLasTablas = document.querySelectorAll('table[id^="tabla"]');
-            console.log('🔍 Tablas disponibles en DOM:', 
-                Array.from(todasLasTablas).map(t => t.id)
-            );
         }
     });
 
-    // Verificar el resultado
     setTimeout(() => {
         console.log('📊 Resumen final de tablas:', {
             configuradas: Object.keys(modulosConfig).length,
@@ -754,150 +730,10 @@ function inicializarSistema() {
         }
     }, 1000);
 }
-// ELIMINA el método manejarCambioPestana de la clase TableManager
-// Y reemplázalo por esta función global mejorada:
-
-function manejarCambioPestana(tabId) {
-    console.log('🌍 Función global manejarCambioPestana llamada con:', tabId);
-    
-    // Verificar que tableManager exista y tenga tables
-    if (!window.tableManager) {
-        console.error('❌ TableManager no disponible');
-        mostrarNotificacion('Error: Sistema de tablas no disponible', 'error');
-        return;
-    }
-    
-    if (!window.tableManager.tables) {
-        console.error('❌ tableManager.tables no está definido');
-        console.log('🔍 tableManager completo:', window.tableManager);
-        
-        // Intentar reparar
-        window.tableManager.tables = {};
-        console.log('🔄 tables inicializado:', window.tableManager.tables);
-    }
-    
-    // Mapeo correcto de IDs de pestañas a módulos
-    const moduloMap = {
-        'productos': 'productos',
-        'categorias': 'categorias', 
-        'usuarios': 'usuarios',
-        'proveedores': 'proveedores',
-        'bodegas': 'bodegas',
-        'cajas': 'cajas',
-        'estados': 'estados',
-        'tipos-documento': 'tipos_documento',
-        'tipos-promocion': 'tipos_promocion',
-        'metodos-pago': 'metodos_pago'
-    };
-    
-    const modulo = moduloMap[tabId] || tabId;
-    const tableId = generarTableId(modulo);
-    
-    console.log(`📋 Módulo: ${modulo}, TableID: ${tableId}`);
-    console.log('🔍 Tablas disponibles:', Object.keys(window.tableManager.tables));
-    
-    if (window.tableManager.tables[tableId]) {
-        console.log(`✅ Cargando tabla existente: ${tableId}`);
-        window.tableManager.cargarTabla(tableId);
-    } else {
-        console.warn(`⚠️ Tabla no inicializada: ${tableId}`);
-        intentarInicializarTabla(modulo, tableId);
-    }
-}
-function generarTableId(modulo) {
-    console.log(`🔧 Generando tableId para módulo: ${modulo}`);
-    
-    // Intentar usar la configuración primero
-    if (CONFIGURACION_SISTEMA.mapeos && CONFIGURACION_SISTEMA.mapeos.moduloToTableId) {
-        const tableIdConfigurado = CONFIGURACION_SISTEMA.mapeos.moduloToTableId[modulo];
-        if (tableIdConfigurado) {
-            console.log(`✅ TableId desde configuración: ${tableIdConfigurado}`);
-            return tableIdConfigurado;
-        }
-    }
-    
-    // Fallback: lógica original
-    const tableIdMap = {
-        'tipos_documento': 'tablaTiposDocumento',
-        'tipos_promocion': 'tablaTiposPromocion', 
-        'metodos_pago': 'tablaMetodosPago'
-    };
-    
-    const tableId = tableIdMap[modulo] || `tabla${capitalize(modulo)}`;
-    console.log(`🔧 TableId calculado: ${tableId}`);
-    
-    return tableId;
-}
-
-// Función auxiliar para intentar inicializar tabla
-function intentarInicializarTabla(modulo, tableId) {
-    console.log(`🔧 Intentando inicializar tabla faltante: ${tableId} para módulo: ${modulo}`);
-    
-    // Verificar si existe el elemento DOM
-    const tableElement = document.getElementById(tableId);
-    if (!tableElement) {
-        console.error(`❌ Elemento DOM no encontrado: ${tableId}`);
-        mostrarErrorTabla(modulo, tableId);
-        return false;
-    }
-    
-    // Obtener configuración de columnas
-    let columnasConfig;
-    
-    if (window.configManager) {
-        columnasConfig = window.configManager.getColumnasConfig(modulo);
-    } else if (window.columnasConfig && window.columnasConfig[modulo]) {
-        columnasConfig = window.columnasConfig[modulo];
-    } else {
-        console.error(`❌ No se encontró configuración de columnas para: ${modulo}`);
-        return false;
-    }
-    
-    if (!columnasConfig || columnasConfig.length === 0) {
-        console.error(`❌ Configuración de columnas vacía para: ${modulo}`);
-        return false;
-    }
-    
-    try {
-        console.log(`✅ Inicializando tabla: ${tableId} con ${columnasConfig.length} columnas`);
-        window.tableManager.inicializarTabla(tableId, modulo, columnasConfig);
-        
-        // Cargar datos inmediatamente
-        setTimeout(() => {
-            window.tableManager.cargarTabla(tableId);
-        }, 100);
-        
-        return true;
-    } catch (error) {
-        console.error(`❌ Error inicializando tabla ${tableId}:`, error);
-        return false;
-    }
-}
-
-// Función para mostrar error de tabla
-function mostrarErrorTabla(modulo, tableId) {
-    const container = document.querySelector(`#${tableId.replace('tabla', '').toLowerCase()}`);
-    if (container) {
-        container.innerHTML = `
-            <div class="alert alert-warning" role="alert">
-                <h6><i class="fas fa-exclamation-triangle"></i> Tabla no disponible</h6>
-                <p>No se pudo cargar la tabla para el módulo <strong>${modulo}</strong>.</p>
-                <small>ID esperado: <code>${tableId}</code></small>
-                <br>
-                <button class="btn btn-sm btn-outline-primary mt-2" onclick="location.reload()">
-                    <i class="fas fa-sync"></i> Recargar página
-                </button>
-            </div>
-        `;
-    }
-}
-
-// Función mejorada para inicializar sistema
 
 function inicializarSistema() {
     console.log('🚀 Inicializando sistema con verificación mejorada...');
     
-    // Verificar que las instancias globales estén correctas
     if (!window.api) {
         console.error('❌ API no disponible, recreando...');
         window.api = new ApiClient();
@@ -914,7 +750,6 @@ function inicializarSistema() {
         tables: window.tableManager ? window.tableManager.tables : 'no tableManager'
     });
     
-    // Usar la nueva estructura de configuración
     let modulosConfig;
     
     if (window.configManager) {
@@ -937,9 +772,11 @@ function inicializarSistema() {
         return;
     }
 
-    console.log('📋 Inicializando tablas para módulos:', Object.keys(modulosConfig));
+    console.log('📋 Módulos configurados para inicialización:', Object.keys(modulosConfig));
 
-    // Inicializar todas las tablas con verificación mejorada
+    // SOLO inicializar tablas si los elementos DOM existen
+    let tablasInicializadas = 0;
+    
     Object.keys(modulosConfig).forEach(modulo => {
         const tableId = window.tableManager.generarTableId(modulo);
         const tableElement = document.getElementById(tableId);
@@ -951,124 +788,30 @@ function inicializarSistema() {
             try {
                 window.tableManager.inicializarTabla(tableId, modulo, modulosConfig[modulo]);
                 console.log(`✅ Tabla ${tableId} inicializada correctamente`);
+                tablasInicializadas++;
             } catch (error) {
                 console.error(`❌ Error inicializando tabla ${tableId}:`, error);
             }
         } else {
-            console.warn(`⚠️ Elemento DOM no encontrado: ${tableId}`);
+            console.log(`⏳ Tabla ${tableId} no encontrada en DOM (se inicializará cuando se necesite)`);
         }
     });
 
-    // FORZAR CARGA DE LA PRIMERA TABLA DESPUÉS DE INICIALIZAR
     setTimeout(() => {
-        console.log('🎯 Cargando primera tabla automáticamente...');
-        cargarPrimeraTabla();
-    }, 500);
-}
-
-
-// NUEVA FUNCIÓN: Activar pestaña por módulo
-function activarPestanaPorModulo(modulo) {
-    console.log(`🔍 Activando pestaña para módulo: ${modulo}`);
-    
-    // Obtener el ID de pestaña desde la configuración
-    let pestanaId;
-    
-    if (window.configManager) {
-        // Usar el método del configManager si está disponible
-        pestanaId = window.configManager.convertirModuloATabId(modulo);
-    } else if (window.generadorHTML) {
-        // Usar el generadorHTML si está disponible
-        pestanaId = window.generadorHTML.convertirModuloATabId(modulo);
-    } else {
-        // Fallback: usar el mapeo desde la configuración global
-        const moduloConfig = CONFIGURACION_SISTEMA.modulos[modulo];
-        if (moduloConfig) {
-            // Usar la misma lógica que en generador-html.js
-            const mapaEspecial = {
-                'tipos_documento': 'tipos-documento',
-                'tipos_promocion': 'tipos-promocion', 
-                'metodos_pago': 'metodos-pago'
-            };
-            pestanaId = mapaEspecial[modulo] || modulo;
-        } else {
-            console.error(`❌ No se encontró configuración para módulo: ${modulo}`);
-            return;
-        }
-    }
-    
-    console.log(`🎯 ID de pestaña calculado: ${pestanaId}`);
-    
-    if (!pestanaId) {
-        console.warn(`⚠️ No se pudo determinar pestaña para módulo: ${modulo}`);
-        return;
-    }
-    
-    // Encontrar el botón de la pestaña y activarlo
-    const pestanaElement = document.getElementById(`${pestanaId}-tab`);
-    const contenidoElement = document.getElementById(pestanaId);
-    
-    if (pestanaElement && contenidoElement) {
-        // Remover active de todas las pestañas
-        document.querySelectorAll('.nav-link').forEach(navLink => {
-            navLink.classList.remove('active');
+        console.log('📊 Resumen final de tablas:', {
+            configuradas: Object.keys(modulosConfig).length,
+            inicializadas: tablasInicializadas,
+            tablas: Object.keys(window.tableManager.tables)
         });
         
-        // Remover show active de todos los contenidos
-        document.querySelectorAll('.tab-pane').forEach(tabPane => {
-            tabPane.classList.remove('show', 'active');
-        });
-        
-        // Activar la pestaña seleccionada
-        pestanaElement.classList.add('active');
-        contenidoElement.classList.add('show', 'active');
-        
-        console.log(`✅ Pestaña ${pestanaId} activada correctamente`);
-    } else {
-        console.error(`❌ No se pudo encontrar elementos de pestaña: ${pestanaId}-tab o ${pestanaId}`);
-        
-        // Debug: mostrar todas las pestañas disponibles
-        const pestanasDisponibles = Array.from(document.querySelectorAll('.nav-link')).map(p => p.id);
-        const contenidosDisponibles = Array.from(document.querySelectorAll('.tab-pane')).map(t => t.id);
-        console.log('🔍 Pestañas disponibles:', pestanasDisponibles);
-        console.log('🔍 Contenidos disponibles:', contenidosDisponibles);
-    }
-}
-
-
-
-// INICIALIZACIÓN DE SEGURIDAD - Por si falla la inicialización automática
-function inicializacionSeguridad() {
-    console.log('🔧 Ejecutando inicialización de seguridad...');
-    
-    // Verificar si el sistema ya se inicializó
-    const tablasInicializadas = window.tableManager && window.tableManager.tables ? 
-        Object.keys(window.tableManager.tables) : [];
-    
-    if (tablasInicializadas.length === 0) {
-        console.log('🔄 Sistema no inicializado, forzando inicialización...');
-        
-        if (typeof inicializarSistema === 'function') {
-            inicializarSistema();
+        if (tablasInicializadas > 0) {
+            mostrarNotificacion(`Sistema inicializado - ${tablasInicializadas} tablas listas`, 'success');
         } else {
-            console.error('❌ inicializarSistema no disponible');
+            console.log('ℹ️ No se inicializaron tablas aún - se inicializarán bajo demanda');
         }
-    } else {
-        console.log('✅ Sistema ya inicializado, tablas:', tablasInicializadas);
-    }
+    }, 1000);
 }
 
-// Ejecutar después de 3 segundos por si falla la inicialización automática
-setTimeout(inicializacionSeguridad, 3000);
-
-// También ejecutar cuando la página esté completamente cargada
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', inicializacionSeguridad);
-} else {
-    inicializacionSeguridad();
-}
-
-// Funciones para la nueva estructura
 function recargarTabla(tableId) {
     if (window.tableManager) {
         window.tableManager.cargarTabla(tableId);
@@ -1080,32 +823,27 @@ function exportarTodo() {
     mostrarNotificacion('Función de exportación en desarrollo', 'info');
 }
 
-// Búsqueda global (concepto)
 function configurarBusquedaGlobal() {
     const busquedaGlobal = document.getElementById('busquedaGlobal');
     if (busquedaGlobal) {
         busquedaGlobal.addEventListener('input', function(e) {
             const termino = e.target.value.toLowerCase();
-            // Implementar búsqueda global en todas las tablas
             console.log('Búsqueda global:', termino);
         });
     }
 }
 
-// Actualizar contadores de registros
 function actualizarContadores() {
     if (window.tableManager) {
         Object.keys(window.tableManager.tables).forEach(tableId => {
             const contador = document.getElementById(`contador-${tableId}`);
             if (contador) {
-                // Esto se podría mejorar obteniendo el total real de la API
                 contador.textContent = 'Cargando...';
             }
         });
     }
 }
 
-// Inicializar funcionalidades de la nueva estructura
 function inicializarEstructuraMejorada() {
     configurarBusquedaGlobal();
     actualizarContadores();
@@ -1113,17 +851,14 @@ function inicializarEstructuraMejorada() {
     console.log('✅ Estructura mejorada inicializada');
 }
 
-// Ejecutar después de la carga
 setTimeout(inicializarEstructuraMejorada, 2000);
 
-// NUEVA FUNCIÓN: Cargar la primera tabla automáticamente
 function cargarPrimeraTabla() {
     if (!window.tableManager || !window.tableManager.tables) {
         console.error('❌ TableManager no disponible para cargar primera tabla');
         return;
     }
     
-    // Cargar el primer módulo automáticamente
     const primerModulo = Object.keys(CONFIGURACION_SISTEMA.modulos)[0];
     if (primerModulo) {
         const tabId = window.configManager ? 
@@ -1132,5 +867,95 @@ function cargarPrimeraTabla() {
             
         console.log(`🎯 Cargando primer módulo automáticamente: ${primerModulo}`);
         cargarModulo(primerModulo, tabId);
+    }
+}
+
+function cargarModuloMenu(modulo) {
+    console.log(`📂 Cargando módulo: ${modulo}`);
+    
+    // Verificar que los elementos necesarios existan
+    if (!window.configManager || !window.tableManager) {
+        console.error('❌ ConfigManager o TableManager no disponibles');
+        setTimeout(() => cargarModuloMenu(modulo), 500);
+        return;
+    }
+    
+    const moduloConfig = CONFIGURACION_SISTEMA.modulos[modulo];
+    if (!moduloConfig) {
+        console.error(`❌ Configuración no encontrada para módulo: ${modulo}`);
+        return;
+    }
+    
+    // Actualizar menú activo
+    document.querySelectorAll('.list-group-item').forEach(item => {
+        item.classList.remove('active');
+    });
+    
+    const itemActivo = document.querySelector(`[data-modulo="${modulo}"]`);
+    if (itemActivo) {
+        itemActivo.classList.add('active');
+    }
+    
+   const contenido = document.getElementById('contenido-modulo');
+    if (!contenido) {
+        console.error('❌ No se encontró el contenedor de contenido');
+        return;
+    }
+    
+    const tableId = window.tableManager.generarTableId(modulo);
+    
+    // Generar el contenido del módulo usando GeneradorHTML
+    contenido.innerHTML = window.generadorHTML.generarContenidoModuloHTML(modulo, moduloConfig, tableId);
+    
+    // Inicializar tabla después de crear el HTML
+    setTimeout(() => {
+        try {
+            const columnasConfig = window.configManager.getColumnasConfig(modulo);
+            
+            if (!columnasConfig || columnasConfig.length === 0) {
+                console.error(`❌ No hay configuración de columnas para: ${modulo}`);
+                return;
+            }
+            
+            // Verificar que la tabla existe en el DOM
+            const tableElement = document.getElementById(tableId);
+            if (!tableElement) {
+                console.error(`❌ No se pudo crear la tabla: ${tableId}`);
+                return;
+            }
+            
+            // Inicializar la tabla si no existe
+            if (!window.tableManager.tables[tableId]) {
+                console.log(`🔄 Inicializando tabla bajo demanda: ${tableId}`);
+                window.tableManager.inicializarTabla(tableId, modulo, columnasConfig);
+            }
+            
+            // Cargar datos
+            window.tableManager.cargarTabla(tableId);
+            console.log(`✅ Módulo ${modulo} cargado correctamente`);
+            
+        } catch (error) {
+            console.error(`❌ Error cargando módulo ${modulo}:`, error);
+        }
+    }, 100);
+}
+
+// Hacer la función disponible globalmente
+window.cargarModuloMenu = cargarModuloMenu;
+
+document.addEventListener('DOMContentLoaded', function() {
+    const menuToggle = document.getElementById('menu-toggle');
+    if (menuToggle) {
+        menuToggle.addEventListener('click', function() {
+            const sidebar = document.getElementById('sidebar-wrapper');
+            sidebar.classList.toggle('toggled');
+        });
+    }
+});
+
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar-wrapper');
+    if (sidebar) {
+        sidebar.classList.toggle('active');
     }
 }
