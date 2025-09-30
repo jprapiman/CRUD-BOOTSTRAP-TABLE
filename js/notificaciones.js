@@ -17,15 +17,15 @@ class SistemaNotificaciones {
             console.error('❌ CONFIGURACION_SISTEMA no encontrada para notificaciones');
             // Configuración por defecto
             this.config = {
-                duracion: 5000,
-                posicion: "top-right",
-                maxVisible: 3,
-                tipos: {
-                    success: { icono: "fa-check-circle", clase: "alert-success" },
-                    error: { icono: "fa-exclamation-circle", clase: "alert-danger" },
-                    warning: { icono: "fa-exclamation-triangle", clase: "alert-warning" },
-                    info: { icono: "fa-info-circle", clase: "alert-info" }
-                }
+				duracion: 5000,
+				posicion: "top-right",
+				maxVisible: 3,
+				tipos: {
+					success: { icono: "bi-check-circle-fill", clase: "alert-success" },
+					error: { icono: "bi-exclamation-circle-fill", clase: "alert-danger" },
+					warning: { icono: "bi-exclamation-triangle-fill", clase: "alert-warning" },
+					info: { icono: "bi-info-circle-fill", clase: "alert-info" }
+				}
             };
         }
     }

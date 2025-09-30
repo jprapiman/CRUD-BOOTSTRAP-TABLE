@@ -202,9 +202,9 @@ class ModalManager {
         try {
             // Mostrar loading con estilo mejorado
             botonGuardar.html(`
-                <i class="fas fa-spinner fa-spin me-1"></i>
-                ${this.currentId ? 'Actualizando...' : 'Guardando...'}
-            `).prop('disabled', true).addClass('btn-loading');
+				<i class="bi bi-arrow-repeat animate-spin me-1"></i>
+				${this.currentId ? 'Actualizando...' : 'Guardando...'}
+			`).prop('disabled', true).addClass('btn-loading');
             
             let resultado;
             if (this.currentId) {
@@ -223,10 +223,10 @@ class ModalManager {
             mostrarNotificacion('Error al guardar el registro: ' + error.message, 'error');
         } finally {
             // Restaurar botón con mejor estilo
-            botonGuardar.html(`
-                <i class="${this.currentId ? 'fas fa-save' : 'fas fa-plus'} me-1"></i>
-                ${this.currentId ? 'Actualizar' : 'Guardar'}
-            `).prop('disabled', false).removeClass('btn-loading');
+			botonGuardar.html(`
+				<i class="${this.currentId ? 'bi bi-save' : 'bi bi-plus-circle'} me-1"></i>
+				${this.currentId ? 'Actualizar' : 'Guardar'}
+			`).prop('disabled', false).removeClass('btn-loading');
         }
     }
 

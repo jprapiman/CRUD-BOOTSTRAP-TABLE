@@ -54,9 +54,9 @@ class ConfigManager {
 
     // Obtener icono del módulo
     getIcono(modulo) {
-        const moduloConfig = this.config.modulos[modulo];
-        return moduloConfig ? moduloConfig.icono : 'fas fa-cube';
-    }
+		const moduloConfig = this.config.modulos[modulo];
+		return moduloConfig ? moduloConfig.icono : 'bi bi-box';
+	}
 
     // Obtener género del módulo
     getGenero(modulo) {

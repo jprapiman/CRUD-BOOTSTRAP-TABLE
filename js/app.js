@@ -122,7 +122,8 @@ class TableManager {
                     if (res && res.success) {
                         return {
                             total: res.total || 0,
-                            rows: res.data || []
+                            rows: res.data || [],
+							module: modulo
                         };
                     }
                     console.warn(`⚠️ Respuesta sin éxito para ${tableId}:`, res);
@@ -291,21 +292,21 @@ class TableManager {
     }
 
     mostrarErrorTabla(modulo, tableId) {
-        const container = document.querySelector(`#${tableId.replace('tabla', '').toLowerCase()}`);
-        if (container) {
-            container.innerHTML = `
-                <div class="alert alert-warning" role="alert">
-                    <h6><i class="fas fa-exclamation-triangle"></i> Tabla no disponible</h6>
-                    <p>No se pudo cargar la tabla para el módulo <strong>${modulo}</strong>.</p>
-                    <small>ID esperado: <code>${tableId}</code></small>
-                    <br>
-                    <button class="btn btn-sm btn-outline-primary mt-2" onclick="location.reload()">
-                        <i class="fas fa-sync"></i> Recargar página
-                    </button>
-                </div>
-            `;
-        }
-    }
+		const container = document.querySelector(`#${tableId.replace('tabla', '').toLowerCase()}`);
+		if (container) {
+			container.innerHTML = `
+				<div class="alert alert-warning" role="alert">
+					<h6><i class="bi bi-exclamation-triangle"></i> Tabla no disponible</h6>
+					<p>No se pudo cargar la tabla para el módulo <strong>${modulo}</strong>.</p>
+					<small>ID esperado: <code>${tableId}</code></small>
+					<br>
+					<button class="btn btn-sm btn-outline-primary mt-2" onclick="location.reload()">
+						<i class="bi bi-arrow-clockwise"></i> Recargar página
+					</button>
+				</div>
+			`;
+		}
+	}
 
     // FORMATEADORES
     descripcionFormatter(value) {
@@ -335,39 +336,33 @@ class TableManager {
             '<span class="badge bg-danger">Inactivo</span>';
     }
 
-    operateFormatter(row, modulo) {
-        const nombreModulo = window.configManager ? 
-            window.configManager.getNombreModulo(modulo) : 
-            modulo;
-        
-        return `
-            <div class="btn-group btn-group-sm" role="group" aria-label="Acciones para ${nombreModulo}">
-                <button type="button" 
-                        class="btn btn-outline-warning" 
-                        onclick="editar('${modulo}', ${row.id})" 
-                        title="Editar ${nombreModulo}"
-                        data-bs-toggle="tooltip"
-                        data-bs-placement="top">
-                    <i class="fas fa-edit fa-xs"></i>
-                </button>
-                <button type="button" 
-                        class="btn btn-outline-danger" 
-                        onclick="eliminar('${modulo}', ${row.id})" 
-                        title="Eliminar ${nombreModulo}"
-                        data-bs-toggle="tooltip"
-                        data-bs-placement="top">
-                    <i class="fas fa-trash fa-xs"></i>
-                </button>
-            </div>
-        `;
-    }
-
-    ivaFormatter(value) {
-        return value ? 
-            '<span class="badge bg-info">Sí</span>' : 
-            '<span class="badge bg-secondary">No</span>';
-    }
-
+   operateFormatter(row, modulo) {
+		const nombreModulo = window.configManager ? 
+			window.configManager.getNombreModulo(modulo) : 
+			modulo;
+		
+		return `
+			<div class="btn-group btn-group-sm" role="group" aria-label="Acciones para ${nombreModulo}">
+				<button type="button" 
+						class="btn btn-outline-warning" 
+						onclick="editar('${modulo}', ${row.id})" 
+						title="Editar ${nombreModulo}"
+						data-bs-toggle="tooltip"
+						data-bs-placement="top">
+					<i class="bi bi-pencil-square"></i>
+				</button>
+				<button type="button" 
+						class="btn btn-outline-danger" 
+						onclick="eliminar('${modulo}', ${row.id})" 
+						title="Eliminar ${nombreModulo}"
+						data-bs-toggle="tooltip"
+						data-bs-placement="top">
+					<i class="bi bi-trash3"></i>
+				</button>
+			</div>
+		`;
+	}
+   
     rolFormatter(value) {
         const colores = {
             'ADMIN': 'danger',
@@ -380,11 +375,23 @@ class TableManager {
         return `<span class="badge bg-${color}">${value}</span>`;
     }
 
-    principalFormatter(value) {
-        return value ? 
-            '<span class="badge bg-primary"><i class="fas fa-star"></i> Principal</span>' : 
-            '<span class="badge bg-secondary">Secundaria</span>';
-    }
+    ivaFormatter(value) {
+		return value ? 
+			'<span class="badge bg-info"><i class="bi bi-check"></i> Sí</span>' : 
+			'<span class="badge bg-secondary"><i class="bi bi-x"></i> No</span>';
+	}
+
+	principalFormatter(value) {
+		return value ? 
+			'<span class="badge bg-primary"><i class="bi bi-star-fill"></i> Principal</span>' : 
+			'<span class="badge bg-secondary">Secundaria</span>';
+	}
+
+	booleanoFormatter(value) {
+		return value ? 
+			'<span class="badge bg-success"><i class="bi bi-check"></i></span>' : 
+			'<span class="badge bg-secondary"><i class="bi bi-x"></i></span>';
+	}
 
     moduloFormatter(value) {
         const colores = {
@@ -398,11 +405,7 @@ class TableManager {
         return `<span class="badge bg-${color}">${value}</span>`;
     }
 
-    booleanoFormatter(value) {
-        return value ? 
-            '<span class="badge bg-success"><i class="fas fa-check"></i></span>' : 
-            '<span class="badge bg-secondary"><i class="fas fa-times"></i></span>';
-    }
+    
 
     formulaFormatter(value) {
         if (!value) return '<span class="text-muted">N/A</span>';
@@ -1053,3 +1056,37 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+
+// Función para generar botones personalizados de Bootstrap Table
+window.buttons = {
+    btnNuevo: {
+        text: 'Nuevo',
+        icon: 'bi bi-plus-circle',
+        event: function () {
+            // Buscar el toolbar que tiene el data-modulo
+			const table = this.$el;
+			let modulo = table.attr('data-modulo')
+            
+            console.log('Módulo detectado:', modulo);
+            
+            if (!modulo) {
+                console.error('No se pudo detectar el módulo');
+                return;
+            }
+            
+            // Abrir modal
+            if (typeof abrirModal === 'function') {
+                console.log('Abriendo modal para:', modulo);
+                abrirModal(modulo);
+            } else {
+                console.error('Función abrirModal no disponible');
+            }
+        },
+        attributes: {
+            title: 'Crear nuevo registro',
+            'data-bs-toggle': 'tooltip'
+        }
+    }
+};
+
+console.log('Botones registrados:', Object.keys(window.buttons));

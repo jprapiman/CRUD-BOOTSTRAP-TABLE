@@ -4,7 +4,7 @@
 const CONFIGURACION_SISTEMA = {
     // ===== CONFIGURACIÓN GENERAL =====
     sistema: {
-        nombre: "Minimarket Manager",
+        nombre: "CRUD Manager",
         version: "1.0.0",
         empresa: "Mi Empresa",
         año: 2024
@@ -14,7 +14,7 @@ const CONFIGURACION_SISTEMA = {
     branding: {
         nombre: "Minimarket Manager",
         nombreCorto: "MM",
-        logo: "fas fa-store",
+        logo: "bi bi-shop",
         empresa: "Mi Empresa",
         slogan: "Gestión integral de inventario y ventas",
 		colores: {
@@ -39,20 +39,20 @@ const CONFIGURACION_SISTEMA = {
     // ===== CONFIGURACIÓN DE NAVEGACIÓN =====
     navegacion: {
         menuPrincipal: [
-            { nombre: "Dashboard", icono: "fas fa-tachometer-alt", url: "#dashboard", activo: false },
-            { nombre: "Reportes", icono: "fas fa-chart-bar", url: "#reportes", activo: false }
-        ],
+            { nombre: "Dashboard", icono: "bi bi-speedometer2", url: "#dashboard", activo: false },
+			{ nombre: "Reportes", icono: "bi bi-bar-chart-fill", url: "#reportes", activo: false }
+		],
         menuUsuario: [
-            { nombre: "Perfil", icono: "fas fa-user-circle", url: "#perfil" },
-            { nombre: "Configuración", icono: "fas fa-cog", url: "#configuracion" },
-            { separador: true },
-            { nombre: "Cerrar Sesión", icono: "fas fa-sign-out-alt", accion: "logout", clase: "text-danger" }
-        ],
+			{ nombre: "Perfil", icono: "bi bi-person-circle", url: "#perfil" },
+			{ nombre: "Configuración", icono: "bi bi-gear-fill", url: "#configuracion" },
+			{ separador: true },
+			{ nombre: "Cerrar Sesión", icono: "bi bi-box-arrow-right", accion: "logout", clase: "text-danger" }
+		],
         mostrarUsuario: true,
-        usuarioDefecto: {
-            nombre: "Usuario",
-            avatar: "fas fa-user"
-        }
+		usuarioDefecto: {
+			nombre: "Usuario",
+			avatar: "bi bi-user"
+		}
     },
 
     // ===== CONFIGURACIÓN DE TEXTOS E INTERNACIONALIZACIÓN =====
@@ -145,17 +145,17 @@ const CONFIGURACION_SISTEMA = {
             cancelar: { 
                 texto: "Cancelar", 
                 clase: "btn-outline-secondary", 
-                icono: "fas fa-times" 
+                icono: "bi bi-times" 
             },
             guardar: { 
                 texto: "Guardar", 
                 clase: "btn-primary", 
-                icono: "fas fa-save" 
+                icono: "bi bi-save" 
             },
             actualizar: { 
                 texto: "Actualizar", 
                 clase: "btn-primary", 
-                icono: "fas fa-save" 
+                icono: "bi bi-save" 
             }
         },
         configuracion: {
@@ -180,9 +180,9 @@ const CONFIGURACION_SISTEMA = {
             sidePagination: "server",
             locale: "es-ES",
             icons: {
-                refresh: "fas fa-sync",
-                columns: "fas fa-th-list",
-                export: "fas fa-download"
+                refresh: "bi bi-sync",
+                columns: "bi bi-th-list",
+                export: "bi bi-download"
             }
         },
         clases: {
@@ -236,8 +236,8 @@ const CONFIGURACION_SISTEMA = {
             claseTextoVacio: "text-muted"
         },
         boolean: {
-            verdadero: { texto: "Sí", clase: "badge bg-success", icono: "fas fa-check" },
-            falso: { texto: "No", clase: "badge bg-secondary", icono: "fas fa-times" }
+            verdadero: { texto: "Sí", clase: "badge bg-success", icono: "bi bi-check" },
+            falso: { texto: "No", clase: "badge bg-secondary", icono: "bi bi-times" }
         }
     },
 
@@ -328,11 +328,11 @@ const CONFIGURACION_SISTEMA = {
             }
         },
         permisos: {
-            crear: { nombre: "Crear", icono: "fas fa-plus" },
-            editar: { nombre: "Editar", icono: "fas fa-edit" },
-            eliminar: { nombre: "Eliminar", icono: "fas fa-trash" },
-            ver: { nombre: "Ver", icono: "fas fa-eye" },
-            exportar: { nombre: "Exportar", icono: "fas fa-download" }
+            crear: { nombre: "Crear", icono: "bi bi-plus" },
+            editar: { nombre: "Editar", icono: "bi bi-edit" },
+            eliminar: { nombre: "Eliminar", icono: "bi bi-trash" },
+            ver: { nombre: "Ver", icono: "bi bi-eye" },
+            exportar: { nombre: "Exportar", icono: "bi bi-download" }
         }
     },
 
@@ -341,7 +341,7 @@ const CONFIGURACION_SISTEMA = {
         categorias: {
             singular: 'Categoría',
             plural: 'Categorías',
-            icono: 'fas fa-tags',
+			icono: 'bi bi-tags-fill', // CAMBIAR
             genero: 'femenino',
             descripcion: 'Gestión de categorías de productos',
             tabId: 'categorias',
@@ -368,7 +368,7 @@ const CONFIGURACION_SISTEMA = {
         productos: {
             singular: 'Producto',
             plural: 'Productos',
-            icono: 'fas fa-box',
+			icono: 'bi bi-box-seam-fill', // CAMBIAR
             genero: 'masculino',
             descripcion: 'Gestión de productos del inventario',
             tabId: 'productos',
@@ -404,7 +404,7 @@ const CONFIGURACION_SISTEMA = {
         usuarios: {
             singular: 'Usuario',
             plural: 'Usuarios',
-            icono: 'fas fa-users',
+			icono: 'bi bi-people-fill', // CAMBIAR
             genero: 'común',
             descripcion: 'Gestión de usuarios del sistema',
             tabId: 'usuarios',
@@ -443,7 +443,7 @@ const CONFIGURACION_SISTEMA = {
         proveedores: {
             singular: 'Proveedor',
             plural: 'Proveedores',
-            icono: 'fas fa-truck',
+			icono: 'bi bi-truck', // CAMBIAR
             genero: 'masculino',
             descripcion: 'Gestión de proveedores',
             tabId: 'proveedores',
@@ -474,7 +474,7 @@ const CONFIGURACION_SISTEMA = {
         bodegas: {
             singular: 'Bodega',
             plural: 'Bodegas',
-            icono: 'fas fa-warehouse',
+			icono: 'bi bi-building', // CAMBIAR
             genero: 'femenino',
             descripcion: 'Gestión de bodegas de almacenamiento',
             tabId: 'bodegas',
@@ -503,7 +503,7 @@ const CONFIGURACION_SISTEMA = {
         cajas: {
             singular: 'Caja',
             plural: 'Cajas',
-            icono: 'fas fa-cash-register',
+			icono: 'bi bi-cash-stack', // CAMBIAR
             genero: 'femenino',
             descripcion: 'Gestión de cajas registradoras',
             tabId: 'cajas',
@@ -530,7 +530,7 @@ const CONFIGURACION_SISTEMA = {
         estados: {
             singular: 'Estado',
             plural: 'Estados',
-            icono: 'fas fa-list',
+			icono: 'bi bi-list-check', // CAMBIAR
             genero: 'masculino',
             descripcion: 'Gestión de estados del sistema',
             tabId: 'estados',
@@ -565,7 +565,7 @@ const CONFIGURACION_SISTEMA = {
         tipos_documento: {
             singular: 'Tipo de Documento',
             plural: 'Tipos de Documento',
-            icono: 'fas fa-file-invoice',
+			icono: 'bi bi-file-earmark-text', // CAMBIAR
             genero: 'masculino',
             descripcion: 'Gestión de tipos de documentos',
             tabId: 'tipos-documento',
@@ -597,7 +597,7 @@ const CONFIGURACION_SISTEMA = {
         tipos_promocion: {
             singular: 'Tipo de Promoción',
             plural: 'Tipos de Promoción',
-            icono: 'fas fa-percentage',
+			icono: 'bi bi-percent', // CAMBIAR
             genero: 'masculino',
             descripcion: 'Gestión de tipos de promociones',
             tabId: 'tipos-promocion',
@@ -625,7 +625,7 @@ const CONFIGURACION_SISTEMA = {
         metodos_pago: {
             singular: 'Método de Pago',
             plural: 'Métodos de Pago',
-            icono: 'fas fa-credit-card',
+			icono: 'bi bi-credit-card-fill', // CAMBIAR
             genero: 'masculino',
             descripcion: 'Gestión de métodos de pago',
             tabId: 'metodos-pago',
@@ -705,18 +705,18 @@ const CONFIGURACION_SISTEMA = {
             info: 'bg-info'
         },
         iconos: {
-            crear: 'fas fa-plus',
-            editar: 'fas fa-edit',
-            eliminar: 'fas fa-trash',
-            guardar: 'fas fa-save',
-            cancelar: 'fas fa-times',
-            buscar: 'fas fa-search',
-            actualizar: 'fas fa-sync',
-            exportar: 'fas fa-download',
-            imprimir: 'fas fa-print',
-            configuracion: 'fas fa-cog',
-            usuario: 'fas fa-user',
-            logout: 'fas fa-sign-out-alt'
+            crear: 'bi bi-plus',
+            editar: 'bi bi-edit',
+            eliminar: 'bi bi-trash',
+            guardar: 'bi bi-save',
+            cancelar: 'bi bi-times',
+            buscar: 'bi bi-search',
+            actualizar: 'bi bi-sync',
+            exportar: 'bi bi-download',
+            imprimir: 'bi bi-print',
+            configuracion: 'bi bi-cog',
+            usuario: 'bi bi-user',
+            logout: 'bi bi-sign-out-alt'
         },
         layout: {
             sidebar: {

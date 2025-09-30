@@ -22,110 +22,230 @@ class GeneradorHTML {
 
 // Navbar mejorado con menú responsive Y menú de usuario
 // Navbar mejorado con menú responsive
-	generarNavbar() {
-		const branding = this.config.branding;
-		const navegacion = this.config.navegacion;
-
-		return `
-			<nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top shadow-sm">
-				<div class="container-fluid">
-					<a class="navbar-brand fw-bold" href="#">
-						<i class="${branding.logo} me-2"></i>
-						${branding.nombre}
-					</a>
-					
-					<button class="navbar-toggler d-lg-none" type="button" onclick="toggleSidebar()">
-						<span class="navbar-toggler-icon"></span>
-					</button>
-					
-					<div class="collapse navbar-collapse">
-						<ul class="navbar-nav ms-auto">
-							${navegacion.menuPrincipal.map(item => `
-								<li class="nav-item">
-									<a class="nav-link" href="${item.url}">
-										<i class="${item.icono}"></i>
-										${item.nombre}
-									</a>
-								</li>
-							`).join('')}
-						</ul>
-					</div>
-				</div>
-			</nav>
-		`;
-	}
-
-// Generar menú de usuario (corregido)
-generarMenuUsuario() {
+generarNavbar() {
+    const branding = this.config.branding;
     const navegacion = this.config.navegacion;
     const usuario = navegacion.usuarioDefecto;
-    const menu = navegacion.menuUsuario || [];
 
     return `
-        <ul class="navbar-nav">
-            <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                    <i class="${usuario.avatar} me-1"></i>
-                    ${usuario.nombre}
+        <nav class="navbar navbar-expand-lg navbar-light bg-white fixed-top shadow-sm border-bottom">
+            <div class="container-fluid">
+                <!-- Brand -->
+                <a class="navbar-brand fw-bold d-flex align-items-center" href="#">
+                    <i class="${branding.logo} me-2"></i>
+                    <span class="d-none d-sm-inline">${branding.nombre}</span>
+                    <span class="d-inline d-sm-none">${branding.nombreCorto || 'MM'}</span>
                 </a>
-                <ul class="dropdown-menu dropdown-menu-end">
-                    ${menu.map(item => {
-                        if (item.separador) {
-                            return '<li><hr class="dropdown-divider"></li>';
-                        }
-                        return `
-                            <li>
-                                <a class="dropdown-item ${item.clase || ''}" href="${item.url || '#'}" 
-                                   ${item.accion ? `onclick="${item.accion}()"` : ''}>
-                                    <i class="${item.icono} me-2"></i>
+                
+                <!-- Botón hamburguesa para móvil -->
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" 
+                        data-bs-target="#navbarContent" aria-controls="navbarContent" 
+                        aria-expanded="false" aria-label="Toggle navigation"
+                        onclick="toggleNavbarOverlay()">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                
+                <!-- Contenido colapsable del navbar -->
+                <div class="collapse navbar-collapse" id="navbarContent">
+                    <!-- Menú de navegación principal -->
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        ${navegacion.menuPrincipal.map(item => `
+                            <li class="nav-item">
+                                <a class="nav-link ${item.activo ? 'active' : ''}" href="${item.url}"
+                                   onclick="cerrarNavbarMovil()">
+                                    <i class="${item.icono} me-1"></i>
                                     ${item.nombre}
                                 </a>
                             </li>
-                        `;
-                    }).join('')}
-                </ul>
-            </li>
-        </ul>
+                        `).join('')}
+                    </ul>
+                    
+                    <!-- Divider -->
+                    <hr class="d-lg-none my-2">
+                    
+                    <!-- Menú de módulos (SOLO en móvil dentro del navbar) -->
+                    <div class="d-lg-none mb-3">
+                        <h6 class="text-muted mb-2 px-3">
+                            <i class="bi bi-grid-3x3-gap-fill me-2"></i>Módulos
+                        </h6>
+                        ${this.generarMenuLateralParaNavbar()}
+                    </div>
+                    
+                    <!-- Divider -->
+                    <hr class="d-lg-none my-2">
+                    
+                    <!-- Menú de usuario -->
+                    ${this.generarMenuUsuarioResponsive()}
+                </div>
+            </div>
+        </nav>
     `;
 }
 
-// En generarAplicacionCompleta, asegurar que el sidebar tenga la clase correcta
-generarAplicacionCompleta() {
-    return `
-        ${this.generarNavbar()}
-        
-        <!-- Contenedor principal con sidebar -->
-        <div class="d-flex" id="wrapper">
-            <!-- Sidebar -->
-            <div class="bg-white border-end" id="sidebar-wrapper">
-                <div class="sidebar-heading border-bottom bg-light px-3 py-2">
-                    <h6 class="mb-0 d-flex align-items-center">
-                        <i class="fas fa-th-large me-2 text-primary"></i>
-                        Módulos
-                    </h6>
-                </div>
-                <div class="list-group list-group-flush">
-                    ${this.generarMenuLateral()}
-                </div>
-            </div>
-            
-            <!-- Contenido principal -->
-            <div id="page-content-wrapper">
-                <div class="container-fluid p-3">
-                    <!-- Área de notificaciones -->
-                    <div id="notificaciones" class="fixed-notifications"></div>
-                    
-                    <!-- Contenido dinámico del módulo -->
-                    <div id="contenido-modulo">
-                        <!-- El contenido se carga dinámicamente aquí -->
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        ${this.generarFooter()}
-    `;
-}
+
+
+	// Nuevo método: Generar menú lateral para el navbar (móvil)
+	generarMenuLateralParaNavbar() {
+		const modulos = Object.keys(this.config.modulos);
+		let menuHTML = '<ul class="navbar-nav">';
+		
+		modulos.forEach((modulo, index) => {
+			const moduloConfig = this.config.modulos[modulo];
+			const activeClass = index === 0 ? 'active' : '';
+			
+			menuHTML += `
+				<li class="nav-item">
+					<a href="#" 
+					   class="nav-link ${activeClass}" 
+					   data-modulo="${modulo}"
+					   onclick="cargarModuloMenu('${modulo}'); 
+								document.getElementById('navbarContent').classList.remove('show');
+								return false;">
+						<i class="${moduloConfig.icono || 'bi bi-box'} me-2"></i>
+						${moduloConfig.plural}
+					</a>
+				</li>
+			`;
+		});
+		
+		menuHTML += '</ul>';
+		return menuHTML;
+	}
+		
+	generarMenuModulosNavbar() {
+		if (!this.config || !this.config.modulos) {
+			return '';
+		}
+
+		const modulos = Object.keys(this.config.modulos);
+		let menuHTML = '';
+		
+		modulos.forEach((modulo) => {
+			const moduloConfig = this.config.modulos[modulo];
+			const tabId = this.convertirModuloATabId(modulo);
+			
+			menuHTML += `
+				<li class="nav-item">
+					<a class="nav-link text-white" href="#" 
+					   onclick="cargarModuloDesdeNavbar('${modulo}'); cerrarNavbarMovil(); return false;">
+						<i class="${moduloConfig.icono || 'bi bi-box'} me-1"></i>
+						${moduloConfig.plural}
+					</a>
+				</li>
+			`;
+		});
+
+		return menuHTML;
+	}
+	
+	// Método auxiliar para el menú de usuario responsive
+	generarMenuUsuarioResponsive() {
+		const navegacion = this.config.navegacion;
+		const usuario = navegacion.usuarioDefecto;
+		const menu = navegacion.menuUsuario || [];
+
+		return `
+			<ul class="navbar-nav">
+				<!-- Menú de usuario en escritorio -->
+				<li class="nav-item dropdown d-none d-lg-block">
+					<a class="nav-link dropdown-toggle d-flex align-items-center" href="#" 
+					   role="button" data-bs-toggle="dropdown" aria-expanded="false">
+						<i class="${usuario.avatar} me-2"></i>
+						${usuario.nombre}
+					</a>
+					<ul class="dropdown-menu dropdown-menu-end">
+						${menu.map(item => {
+							if (item.separador) {
+								return '<li><hr class="dropdown-divider"></li>';
+							}
+							return `
+								<li>
+									<a class="dropdown-item ${item.clase || ''}" 
+									   href="${item.url || '#'}" 
+									   ${item.accion ? `onclick="${item.accion}(); return false;"` : ''}>
+										<i class="${item.icono} me-2"></i>
+										${item.nombre}
+									</a>
+								</li>
+							`;
+						}).join('')}
+					</ul>
+				</li>
+				
+				<!-- Menú de usuario en móvil (expandido) -->
+				<li class="nav-item d-lg-none">
+					<div class="px-3 py-2 border-top mt-2">
+						<div class="d-flex align-items-center mb-2">
+							<i class="${usuario.avatar} me-2 fs-4"></i>
+							<strong>${usuario.nombre}</strong>
+						</div>
+						${menu.map(item => {
+							if (item.separador) {
+								return '<hr class="my-2">';
+							}
+							return `
+								<a class="d-block py-2 text-decoration-none ${item.clase || ''}" 
+								   href="${item.url || '#'}"
+								   ${item.accion ? `onclick="${item.accion}(); return false;"` : ''}>
+									<i class="${item.icono} me-2"></i>
+									${item.nombre}
+								</a>
+							`;
+						}).join('')}
+					</div>
+				</li>
+			</ul>
+		`;
+	}
+	// En generarAplicacionCompleta, actualizar el onclick del sidebar
+	// En generarAplicacionCompleta, actualizar el onclick del sidebar
+	generarAplicacionCompleta() {
+		return `
+			${this.generarNavbar()}
+			
+			<!-- Contenedor principal con sidebar -->
+			<div class="d-flex" id="wrapper">
+				<!-- Sidebar (solo desktop) -->
+				<div class="bg-white border-end d-none d-lg-block" id="sidebar-wrapper">
+					<div class="sidebar-heading border-bottom bg-light px-3 py-2">
+						<h6 class="mb-0 d-flex align-items-center">
+							<i class="bi bi-grid-3x3-gap-fill me-2 text-primary"></i>
+							Módulos
+						</h6>
+					</div>
+					<div class="list-group list-group-flush">
+						${this.generarMenuLateral()}
+					</div>
+				</div>
+				
+				<!-- Contenido principal -->
+				<div id="page-content-wrapper" class="w-100">
+					<div class="container-fluid p-3">
+						<!-- Área de notificaciones -->
+						<div id="notificaciones" class="fixed-notifications"></div>
+						
+						<!-- Contenido dinámico del módulo -->
+						<div id="contenido-modulo">
+							<div class="text-center py-5">
+								<i class="bi bi-speedometer2 display-1 text-primary mb-3"></i>
+								<h3>Bienvenido al Sistema</h3>
+								<p class="text-muted">Selecciona un módulo del menú para comenzar</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			${this.generarFooter()}
+			
+			<script>
+				// Inicializar el menú lateral después de que se cargue el DOM
+				document.addEventListener('DOMContentLoaded', function() {
+					setTimeout(actualizarMenuLateral, 100);
+				});
+			</script>
+		`;
+	}
 
     // Generar título principal configurable
     generarTituloPrincipal() {
@@ -133,16 +253,16 @@ generarAplicacionCompleta() {
         const textos = this.config.textos.titulos;
 
         return `
-            <div class="row mb-4">
-                <div class="col-12">
-                    <h1 class="display-6">
-                        <i class="fas fa-tachometer-alt text-primary"></i>
-                        ${textos.panelAdmin}
-                    </h1>
-                    <p class="lead text-muted">${branding.slogan}</p>
-                </div>
-            </div>
-        `;
+			<div class="row mb-4">
+				<div class="col-12">
+					<h1 class="display-6">
+						<i class="bi bi-speedometer2 text-primary"></i>
+						${textos.panelAdmin}
+					</h1>
+					<p class="lead text-muted">${branding.slogan}</p>
+				</div>
+			</div>
+		`;
     }
 
     // Generar todas las pestañas usando configuración
@@ -184,7 +304,7 @@ generarAplicacionCompleta() {
 							aria-controls="${tabId}" 
 							aria-selected="${index === 0 ? 'true' : 'false'}"
 							onclick="window.manejarCambioPestana('${tabId}')">
-						<i class="${moduloConfig.icono || 'fas fa-cube'}"></i>
+						<i class="${moduloConfig.icono || 'bi bi-box'}"></i>
 						${moduloConfig.plural}
 					</button>
 				</li>
@@ -227,7 +347,7 @@ generarAplicacionCompleta() {
 									<div class="stat-label">Total</div>
 								</div>
 								<div class="stat-icon">
-									<i class="fas fa-database"></i>
+									<i class="bi bi-database"></i>
 								</div>
 							</div>
 						</div>
@@ -238,7 +358,7 @@ generarAplicacionCompleta() {
 									<div class="stat-label">Activos</div>
 								</div>
 								<div class="stat-icon">
-									<i class="fas fa-check-circle"></i>
+									<i class="bi bi-check-circle"></i>
 								</div>
 							</div>
 						</div>
@@ -256,103 +376,52 @@ generarAplicacionCompleta() {
 
 		return contenidoHTML;
 	}
- 
-	// Nuevo método para generar tabla con toolbar personalizada
-	generarTablaConToolbar(tableId, modulo, moduloConfig) {
-		const tablaConfig = this.config.tablas;
-		const descripcion = moduloConfig.descripcion || `Gestión de ${moduloConfig.plural.toLowerCase()}`;
-		const textos = this.config.textos;
-		
-		return `
-			<!-- Toolbar personalizada (se renderiza automáticamente por Bootstrap Table) -->
-			<div id="toolbar-${tableId}" class="custom-toolbar">
-				<div class="toolbar-content">
-					<!-- Título del módulo -->
-					<div class="toolbar-title-section">
-						<h4 class="toolbar-title">
-							<i class="${moduloConfig.icono || 'fas fa-cube'} toolbar-icon"></i>
-							${moduloConfig.plural}
-						</h4>
-						<p class="toolbar-description">${descripcion}</p>
-					</div>
-					
-					<!-- Controles de la derecha -->
-					<div class="toolbar-controls">
-						
-						<!-- Botones de acción -->
-						<div class="toolbar-actions">
-							<button type="button" 
-									class="btn btn-primary btn-toolbar"
-									onclick="abrirModal('${modulo}')"
-									data-bs-toggle="tooltip"
-									title="Crear nuevo ${moduloConfig.singular.toLowerCase()}">
-								<i class="${this.config.ui.iconos.crear}"></i>
-								<span class="btn-text">Nuevo</span>
-							</button>
-							
-							<button type="button" 
-									class="btn btn-outline-secondary btn-toolbar"
-									onclick="recargarTabla('${tableId}')"
-									data-bs-toggle="tooltip"
-									title="Actualizar datos">
-								<i class="fas fa-sync-alt"></i>
-							</button>
-							
-							<div class="dropdown">
-								<button class="btn btn-outline-secondary btn-toolbar dropdown-toggle" 
-										type="button" 
-										data-bs-toggle="dropdown"
-										data-bs-toggle="tooltip"
-										title="Más opciones">
-									<i class="fas fa-ellipsis-v"></i>
-								</button>
-								<ul class="dropdown-menu dropdown-menu-end toolbar-dropdown">
-									<li>
-										<a class="dropdown-item" href="#" onclick="exportarDatos('${modulo}', 'excel')">
-											<i class="fas fa-file-excel text-success me-2"></i>Excel
-										</a>
-									</li>
-									<li>
-										<a class="dropdown-item" href="#" onclick="exportarDatos('${modulo}', 'pdf')">
-											<i class="fas fa-file-pdf text-danger me-2"></i>PDF
-										</a>
-									</li>
-									<li><hr class="dropdown-divider"></li>
-									<li>
-										<a class="dropdown-item" href="#" onclick="imprimirTabla('${tableId}')">
-											<i class="fas fa-print text-primary me-2"></i>Imprimir
-										</a>
-									</li>
-								</ul>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-			
-			<table id="${tableId}" 
-				   class="${tablaConfig.clases.tabla}"
-				   data-toggle="table"
-				   data-toolbar="#toolbar-${tableId}"
-				   data-pagination="${tablaConfig.configuracionGlobal.pagination}"
-				   data-search="false"
-				   data-show-refresh="false"
-				   data-show-columns="${tablaConfig.configuracionGlobal.showColumns}"
-				   data-sort-name="${tablaConfig.configuracionGlobal.sortName}"
-				   data-sort-order="${tablaConfig.configuracionGlobal.sortOrder}"
-				   data-page-size="${tablaConfig.configuracionGlobal.pageSize}"
-				   data-page-list="[${tablaConfig.configuracionGlobal.pageList.join(',')}]">
-				<thead class="${tablaConfig.clases.cabecera}">
-					<tr>
-						<!-- Las columnas se generan dinámicamente desde la configuración -->
-					</tr>
-				</thead>
-				<tbody>
-					<!-- Los datos se cargan dinámicamente vía AJAX -->
-				</tbody>
-			</table>
-		`;
-	}
+ generarTablaConToolbar(tableId, modulo, moduloConfig) {
+    const tablaConfig = this.config.tablas;
+    const descripcion = moduloConfig.descripcion || `Gestión de ${moduloConfig.plural.toLowerCase()}`;
+    const textos = this.config.textos;
+    
+    return `
+        <!-- Toolbar personalizada -->
+        <div id="toolbar-${tableId}" class="custom-toolbar">
+            <div class="toolbar-content">
+                <!-- Título del módulo -->
+                <div class="toolbar-title-section">
+                    <h4 class="toolbar-title">
+                        <i class="${moduloConfig.icono || 'bi bi-box'} toolbar-icon"></i>
+                        ${moduloConfig.plural}
+                    </h4>
+                    <p class="toolbar-description">${descripcion}</p>
+                </div>
+            </div>
+        </div>
+        
+        <table id="${tableId}" 
+               class="${tablaConfig.clases.tabla}"
+               data-toggle="table"
+               data-toolbar="#toolbar-${tableId}"
+               data-modulo="${modulo}"
+               data-pagination="${tablaConfig.configuracionGlobal.pagination}"
+               data-search="false"
+               data-show-refresh="false"
+               data-show-columns="${tablaConfig.configuracionGlobal.showColumns}"
+               data-sort-name="${tablaConfig.configuracionGlobal.sortName}"
+               data-sort-order="${tablaConfig.configuracionGlobal.sortOrder}"
+               data-page-size="${tablaConfig.configuracionGlobal.pageSize}"
+               data-page-list="[${tablaConfig.configuracionGlobal.pageList.join(',')}]"
+               data-buttons="buttons"
+               data-buttons-prefix="btn">
+            <thead class="${tablaConfig.clases.cabecera}">
+                <tr>
+                    <!-- Las columnas se generan dinámicamente desde la configuración -->
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Los datos se cargan dinámicamente vía AJAX -->
+            </tbody>
+        </table>
+    `;
+}
 
     // Generar modal usando configuración
     generarModal() {
@@ -368,7 +437,7 @@ generarAplicacionCompleta() {
 					<div class="modal-content">
 						<div class="modal-header bg-primary text-white">
 							<h5 class="modal-title" id="modalGenericoTitle">
-								${modal.configuracion.mostrarIconoTitulo ? '<i class="fas fa-edit me-2"></i>' : ''}
+								${modal.configuracion.mostrarIconoTitulo ? '<i class="bi bi-pencil-square me-2"></i>' : ''}
 								<span class="modal-title-text">Título del Modal</span>
 							</h5>
 							<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="${textos.botones.cerrar}"></button>
@@ -406,17 +475,17 @@ generarAplicacionCompleta() {
                         <div class="col-md-6">
                             ${ui.layout.footer.mostrarCopyright ? `
                                 <p class="text-muted mb-0">
-                                    <i class="fas fa-copyright"></i>
-                                    ${sistema.año} ${sistema.nombre} - Sistema de gestión integral
-                                </p>
+									<i class="bi bi-c-circle"></i>
+									${sistema.año} ${sistema.nombre} - Sistema de gestión integral
+								</p>
                             ` : ''}
                         </div>
                         <div class="col-md-6 text-end">
                             ${ui.layout.footer.mostrarVersion ? `
                                 <p class="text-muted mb-0">
-                                    <i class="fas fa-code"></i>
-                                    v${sistema.version} - Generado dinámicamente desde configuración
-                                </p>
+									<i class="bi bi-code-slash"></i>
+									v${sistema.version} - Generado dinámicamente desde configuración
+								</p>
                             ` : ''}
                         </div>
                     </div>
@@ -464,7 +533,7 @@ generarAplicacionCompleta() {
 						aria-controls="${tabId}" 
 						aria-selected="${index === 0 ? 'true' : 'false'}"
 						onclick="manejarCambioPestana('${tabId}')">
-					<i class="${moduloConfig.icono || 'fas fa-cube'} me-3 fs-5"></i>
+					<i class="${moduloConfig.icono || 'bi bi-box'} me-3 fs-5"></i>
 					<div class="d-flex flex-column">
 						<span class="fw-semibold">${moduloConfig.plural}</span>
 						<small class="text-muted">${moduloConfig.descripcion || 'Gestión del módulo'}</small>
@@ -486,7 +555,7 @@ generarAplicacionCompleta() {
 				<div class="bg-white border-end" id="sidebar-wrapper">
 					<div class="sidebar-heading border-bottom bg-light px-3 py-2">
 						<h6 class="mb-0 d-flex align-items-center">
-							<i class="fas fa-th-large me-2 text-primary"></i>
+							<i class="bi bi-grid-3x3-gap-fill me-2 text-primary"></i>
 							Módulos
 						</h6>
 					</div>
@@ -527,7 +596,7 @@ generarAplicacionCompleta() {
 						<strong>Scripts fallidos:</strong> ${scriptsFallidos.map(f => f.src).join(', ')}
 					</p>
 					<button class="btn btn-outline-danger mt-3" onclick="location.reload()">
-						<i class="fas fa-sync"></i> Recargar Página
+						<i class="bi bi-arrow-clockwise"></i> Recargar Página
 					</button>
 				</div>
 			</div>
@@ -580,20 +649,20 @@ generarAplicacionCompleta() {
 				 role="alert">
 				
 				<div class="d-flex align-items-center">
-					<i class="fas fa-question-circle me-2"></i>
+					<i class="bi bi-question-circle me-2"></i>
 					<span class="flex-grow-1">${mensaje}</span>
 					
 					<div class="btn-group ms-2" role="group">
 						<button type="button" 
 								class="btn btn-sm btn-success" 
 								onclick="sistemaNotificaciones.confirmar('${notificacionId}', true)">
-							<i class="fas fa-check"></i>
+							<i class="bi bi-check"></i>
 							${textos.si || 'Sí'}
 						</button>
 						<button type="button" 
 								class="btn btn-sm btn-secondary" 
 								onclick="sistemaNotificaciones.confirmar('${notificacionId}', false)">
-							<i class="fas fa-times"></i>
+							<i class="bi bi-x"></i>
 							${textos.no || 'No'}
 						</button>
 					</div>
@@ -703,7 +772,7 @@ generarAplicacionCompleta() {
 				</tbody>
 			</table>
 			<small class="text-muted">
-				<i class="fas fa-info-circle"></i>
+				<i class="bi bi-info-circle"></i>
 				${descripcion}
 			</small>
 		`;
@@ -731,10 +800,15 @@ generarAplicacionCompleta() {
 			const activeClass = index === 0 ? 'active' : '';
 			
 			menuHTML += `
-				<a href="#" class="list-group-item list-group-item-action ${activeClass}" 
+				<a href="#" 
+				   class="list-group-item list-group-item-action ${activeClass}" 
 				   data-modulo="${modulo}"
-				   onclick="cargarModuloMenu('${modulo}'); return false;">
-					<i class="${moduloConfig.icono || 'fas fa-cube'} me-2"></i>
+				   onclick="cargarModuloMenu('${modulo}'); 
+							if(window.innerWidth < 992) { 
+								document.getElementById('sidebar-wrapper').classList.remove('show'); 
+							} 
+							return false;">
+					<i class="${moduloConfig.icono || 'bi bi-box'} me-2"></i>
 					<span>${moduloConfig.plural}</span>
 				</a>
 			`;
@@ -742,7 +816,6 @@ generarAplicacionCompleta() {
 		
 		return menuHTML;
 	}
-	
 	// Generar menú vertical de módulos
 	generarMenuVertical() {
 		if (!this.config || !this.config.modulos) {
@@ -762,7 +835,7 @@ generarAplicacionCompleta() {
 				   onclick="cargarModulo('${modulo}', '${tabId}')"
 				   data-modulo="${modulo}"
 				   data-tabid="${tabId}">
-					<i class="${moduloConfig.icono || 'fas fa-cube'} me-3 text-primary"></i>
+					<i class="${moduloConfig.icono || 'bi bi-box'} me-3 text-primary"></i>
 					<div class="flex-grow-1">
 						<div class="fw-semibold">${moduloConfig.plural}</div>
 						<small class="text-muted">${moduloConfig.descripcion || 'Gestión del módulo'}</small>
@@ -880,30 +953,6 @@ generarAplicacionCompleta() {
                 --color-advertencia: ${branding.colores.advertencia};
                 --color-info: ${branding.colores.info};
             }
-            
-            .navbar-brand {
-                font-weight: 600;
-            }
-            
-            .table-responsive {
-                margin-top: 1rem;
-            }
-            
-            .badge {
-                font-size: 0.75em;
-            }
-            
-            .tab-pane {
-                padding: 1rem 0;
-            }
-            
-            .action-buttons {
-                white-space: nowrap;
-            }
-            
-            .table th {
-                font-weight: 600;
-            }
         `;
         
         document.head.appendChild(style);
@@ -1010,3 +1059,154 @@ if (typeof window !== 'undefined') {
     window.GeneradorHTML = GeneradorHTML;
     window.inicializarGeneradorHTML = inicializarGeneradorHTML;
 }
+
+
+// ===== FUNCIONES DE NAVEGACIÓN CORREGIDAS =====
+
+// Función para cargar módulo desde navbar
+function cargarModuloDesdeNavbar(modulo) {
+    console.log(`Cargando módulo desde navbar: ${modulo}`);
+    cargarModulo(modulo, window.configManager.getTabIdPorModulo(modulo));
+}
+
+// Función para cargar módulo desde sidebar
+function cargarModuloDesdeSidebar(modulo) {
+    console.log(`Cargando módulo desde sidebar: ${modulo}`);
+    cargarModulo(modulo, window.configManager.getTabIdPorModulo(modulo));
+    cerrarSidebarEnMovil();
+}
+
+// Función universal para cargar módulos
+function cargarModulo(modulo, tabId) {
+    console.log(`Cargando módulo: ${modulo}, tabId: ${tabId}`);
+    
+    const contenidoModulo = document.getElementById('contenido-modulo');
+    const moduloConfig = CONFIGURACION_SISTEMA.modulos[modulo];
+    
+    if (contenidoModulo && moduloConfig) {
+        const tableId = `tabla${modulo.charAt(0).toUpperCase() + modulo.slice(1)}`;
+        
+        contenidoModulo.innerHTML = `
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h4 class="mb-0">
+                        <i class="${moduloConfig.icono || 'bi bi-box'} me-2 text-primary"></i>
+                        ${moduloConfig.plural}
+                    </h4>
+                    <p class="text-muted mb-0">${moduloConfig.descripcion || ''}</p>
+                </div>
+                <div class="card-body p-0">
+                    ${window.generadorHTML.generarTablaConToolbar(tableId, modulo, moduloConfig)}
+                </div>
+            </div>
+        `;
+        
+        // Inicializar la tabla
+        setTimeout(() => {
+            if (window.inicializarTabla) {
+                window.inicializarTabla(tableId, modulo);
+            }
+        }, 100);
+    }
+}
+
+// Cerrar navbar en móvil después de seleccionar
+function cerrarNavbarMovil() {
+    if (window.innerWidth < 992) {
+        const navbarCollapse = document.getElementById('navbarMainContent');
+        if (navbarCollapse && navbarCollapse.classList.contains('show')) {
+            const bsCollapse = new bootstrap.Collapse(navbarCollapse, {
+                toggle: false
+            });
+            bsCollapse.hide();
+        }
+    }
+}
+
+// Cerrar sidebar en móvil
+function cerrarSidebarEnMovil() {
+    if (window.innerWidth < 992) {
+        const sidebar = document.getElementById('sidebar-wrapper');
+        if (sidebar) {
+            sidebar.classList.remove('show');
+            removeOverlay();
+        }
+    }
+}
+
+// Actualizar los event listeners del menú lateral
+function actualizarMenuLateral() {
+    const menuItems = document.querySelectorAll('#sidebar-wrapper .list-group-item');
+    menuItems.forEach(item => {
+        const modulo = item.getAttribute('data-modulo');
+        item.onclick = function(e) {
+            e.preventDefault();
+            cargarModuloDesdeSidebar(modulo);
+        };
+    });
+}
+// Toggle overlay del navbar
+function toggleNavbarOverlay() {
+    setTimeout(() => {
+        const navbarCollapse = document.getElementById('navbarContent');
+        if (navbarCollapse && navbarCollapse.classList.contains('show')) {
+            document.body.classList.add('navbar-open');
+        } else {
+            document.body.classList.remove('navbar-open');
+        }
+    }, 50);
+}
+
+// Cerrar navbar en móvil
+function cerrarNavbarMovil() {
+    if (window.innerWidth < 992) {
+        const navbarCollapse = document.getElementById('navbarContent');
+        if (navbarCollapse && navbarCollapse.classList.contains('show')) {
+            const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
+            if (bsCollapse) {
+                bsCollapse.hide();
+            }
+        }
+        document.body.classList.remove('navbar-open');
+    }
+}
+
+// Listener para cerrar con el overlay
+document.addEventListener('click', function(e) {
+    if (window.innerWidth < 992 && document.body.classList.contains('navbar-open')) {
+        const navbarCollapse = document.getElementById('navbarContent');
+        const navbar = document.querySelector('.navbar');
+        
+        if (!navbar.contains(e.target)) {
+            cerrarNavbarMovil();
+        }
+    }
+});
+
+// Listener para el colapso de Bootstrap
+document.addEventListener('DOMContentLoaded', function() {
+    const navbarCollapse = document.getElementById('navbarContent');
+    if (navbarCollapse) {
+        navbarCollapse.addEventListener('hidden.bs.collapse', function() {
+            document.body.classList.remove('navbar-open');
+        });
+    }
+});
+
+// Configurar iconos de Bootstrap Table para usar Bootstrap Icons
+$.extend($.fn.bootstrapTable.defaults, {
+    icons: {
+        paginationSwitchDown: 'bi-caret-down-square',
+        paginationSwitchUp: 'bi-caret-up-square',
+        refresh: 'bi-arrow-clockwise',
+        toggleOff: 'bi-toggle-off',
+        toggleOn: 'bi-toggle-on',
+        columns: 'bi-list-ul',
+        fullscreen: 'bi-arrows-fullscreen',
+        detailOpen: 'bi-plus',
+        detailClose: 'bi-dash'
+    },
+    iconSize: undefined,
+    buttonsClass: 'primary',
+    iconsPrefix: 'bi'
+});
