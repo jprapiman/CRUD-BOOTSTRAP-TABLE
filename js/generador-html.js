@@ -548,12 +548,6 @@ generarNavbar() {
 			<div class="d-flex" id="wrapper">
 				<!-- Sidebar -->
 				<div class="bg-white border-end" id="sidebar-wrapper">
-					<div class="sidebar-heading border-bottom bg-light px-3 py-2">
-						<h6 class="mb-0 d-flex align-items-center">
-							<i class="bi bi-grid-3x3-gap-fill me-2 text-primary"></i>
-							Módulos
-						</h6>
-					</div>
 					<div class="list-group list-group-flush">
 						${this.generarMenuLateral()}
 					</div>
@@ -795,14 +789,14 @@ generarNavbar() {
 			const collapseId = `submenu-${grupo.id}`;
 			const isFirstGroup = grupoIndex === 0;
 			
-			// Header del grupo con botón colapsable
+			// Header del grupo - IMPORTANTE: remover collapsed si es el primero
 			menuHTML += `
-				<a href="#${collapseId}" 
-				   class="list-group-item list-group-item-action ${isFirstGroup ? '' : 'collapsed'}"
-				   data-bs-toggle="collapse" 
-				   data-bs-parent="#accordionSidebar"
-				   aria-expanded="${isFirstGroup}" 
-				   aria-controls="${collapseId}">
+				<button class="list-group-item list-group-item-action ${isFirstGroup ? '' : 'collapsed'}"
+						type="button"
+						data-bs-toggle="collapse"
+						data-bs-target="#${collapseId}"
+						aria-expanded="${isFirstGroup}"
+						aria-controls="${collapseId}">
 					<div class="d-flex justify-content-between align-items-center">
 						<span>
 							<i class="${grupo.icono} me-2"></i>
@@ -810,13 +804,15 @@ generarNavbar() {
 						</span>
 						<i class="bi bi-chevron-down"></i>
 					</div>
-				</a>
+				</button>
 			`;
 			
 			// Submenú colapsable con data-bs-parent
-			menuHTML += `<div class="collapse ${isFirstGroup ? 'show' : ''}" 
-							  id="${collapseId}" 
-							  data-bs-parent="#accordionSidebar">`;
+			menuHTML += `
+				<div class="collapse ${isFirstGroup ? 'show' : ''}" 
+					 id="${collapseId}"
+					 data-bs-parent="#accordionSidebar">
+			`;
 			
 			// Items del submenú
 			grupo.submenus.forEach((moduloId, itemIndex) => {
@@ -851,6 +847,7 @@ generarNavbar() {
 		
 		return menuHTML;
 	}
+
 	// Generar menú vertical de módulos
 	generarMenuVertical() {
 		if (!this.config || !this.config.modulos) {

@@ -572,6 +572,57 @@ body {
     }
 }
 
+
+/* Grupo colapsable - Header como BUTTON */
+.list-group-item[data-bs-toggle="collapse"] {
+    cursor: pointer;
+    user-select: none;
+    background: #f8f9fa;
+    border: none;
+    border-bottom: 1px solid #e9ecef;
+    padding: 0.75rem 1rem;
+    transition: all 0.2s ease;
+    font-weight: 600;
+    color: #1e293b;
+    text-decoration: none;
+    text-align: left;
+    width: 100%;
+}
+
+.list-group-item[data-bs-toggle="collapse"]:hover {
+    background: #e9ecef;
+}
+
+.list-group-item[data-bs-toggle="collapse"]:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+.list-group-item[data-bs-toggle="collapse"] .d-flex {
+    width: 100%;
+}
+
+.list-group-item[data-bs-toggle="collapse"] span {
+    display: flex;
+    align-items: center;
+}
+
+.list-group-item[data-bs-toggle="collapse"] i.me-2 {
+    color: var(--color-primary);
+    font-size: 1.1rem;
+}
+
+/* Chevron animado */
+.list-group-item[data-bs-toggle="collapse"] .bi-chevron-down {
+    transition: transform 0.3s ease;
+    font-size: 0.875rem;
+    color: #64748b;
+}
+
+.list-group-item[data-bs-toggle="collapse"]:not(.collapsed) .bi-chevron-down {
+    transform: rotate(180deg);
+}
+
 /* ========================================
    BOTONES
    ======================================== */
