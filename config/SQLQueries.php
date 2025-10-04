@@ -99,5 +99,59 @@ class SQLQueries {
 			'listar' => "SELECT * FROM sp_turnos_caja_listar()"
 		];
 	}
+    
+    // ==========================================
+    // CONFIGURACIÓN DEL SISTEMA
+    // ==========================================
+    
+    public static function configuracion_sistema() {
+        return [
+            'obtener_completa' => "SELECT sp_configuracion_obtener_completa() as configuracion",
+            'obtener_por_clave' => "SELECT valor FROM configuracion_sistema WHERE clave = :clave",
+            'actualizar' => "UPDATE configuracion_sistema SET valor = :valor WHERE clave = :clave"
+        ];
+    }
+    
+    public static function modulos_config() {
+        return [
+            'listar' => "SELECT * FROM sp_modulos_listar()",
+            'obtener_por_codigo' => "SELECT * FROM sp_modulos_obtener_por_codigo(:codigo)",
+            'crear' => "SELECT sp_modulos_crear(:codigo, :singular, :plural, :icono, :genero, :descripcion, :tab_id, :table_id, :tiene_formulario, :orden) as id",
+            'actualizar' => "SELECT sp_modulos_actualizar(:id, :codigo, :singular, :plural, :icono, :genero, :descripcion, :tab_id, :table_id, :tiene_formulario, :orden) as success",
+            'eliminar' => "UPDATE modulos SET activo = false WHERE id = :id"
+        ];
+    }
+    
+    public static function modulo_columnas_formulario() {
+        return [
+            'listar_por_modulo' => "SELECT * FROM sp_modulo_columnas_formulario_listar(:modulo_id)",
+            'crear' => "SELECT sp_modulo_columnas_formulario_crear(:modulo_id, :nombre, :label, :tipo, :requerido, :placeholder, :valor_defecto, :opciones, :validaciones, :orden) as id"
+        ];
+    }
+    
+    public static function modulo_columnas_tabla() {
+        return [
+            'listar_por_modulo' => "SELECT * FROM sp_modulo_columnas_tabla_listar(:modulo_id)",
+            'crear' => "SELECT sp_modulo_columnas_tabla_crear(:modulo_id, :field, :title, :sortable, :width, :align, :orden) as id"
+        ];
+    }
+    
+    public static function modulo_acciones() {
+        return [
+            'listar_por_modulo' => "SELECT * FROM sp_modulo_acciones_listar(:modulo_id)"
+        ];
+    }
+    
+    public static function estructura_menu() {
+        return [
+            'listar' => "SELECT * FROM sp_estructura_menu_listar()"
+        ];
+    }
+    
+    public static function textos_sistema() {
+        return [
+            'listar_por_categoria' => "SELECT * FROM sp_textos_sistema_listar(:categoria, :idioma)"
+        ];
+    }
 }
 ?>
