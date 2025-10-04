@@ -205,13 +205,7 @@ generarNavbar() {
 			<div class="d-flex" id="wrapper">
 				<!-- Sidebar -->
 				<div class="bg-white border-end d-none d-lg-block" id="sidebar-wrapper">
-					<div class="sidebar-heading border-bottom bg-light px-3 py-2">
-						<h6 class="mb-0 d-flex align-items-center">
-							<i class="bi bi-grid-3x3-gap-fill me-2 text-primary"></i>
-							Módulos
-						</h6>
-					</div>
-					<div class="list-group list-group-flush" id="accordionSidebar">
+					<div class="accordion accordion-flush" id="accordionSidebar">
 						${this.generarMenuLateral()}
 					</div>
 				</div>
@@ -789,29 +783,30 @@ generarNavbar() {
 			const collapseId = `submenu-${grupo.id}`;
 			const isFirstGroup = grupoIndex === 0;
 			
-			// Header del grupo - IMPORTANTE: remover collapsed si es el primero
+			// Header del grupo con data-bs-parent
 			menuHTML += `
-				<button class="list-group-item list-group-item-action ${isFirstGroup ? '' : 'collapsed'}"
-						type="button"
-						data-bs-toggle="collapse"
-						data-bs-target="#${collapseId}"
-						aria-expanded="${isFirstGroup}"
-						aria-controls="${collapseId}">
-					<div class="d-flex justify-content-between align-items-center">
-						<span>
-							<i class="${grupo.icono} me-2"></i>
-							<strong>${grupo.nombre}</strong>
-						</span>
-						<i class="bi bi-chevron-down"></i>
-					</div>
-				</button>
-			`;
-			
-			// Submenú colapsable con data-bs-parent
-			menuHTML += `
-				<div class="collapse ${isFirstGroup ? 'show' : ''}" 
-					 id="${collapseId}"
-					 data-bs-parent="#accordionSidebar">
+				<div class="accordion-item border-0">
+					<h2 class="accordion-header">
+						<button class="list-group-item list-group-item-action ${isFirstGroup ? '' : 'collapsed'}"
+								type="button"
+								data-bs-toggle="collapse"
+								data-bs-target="#${collapseId}"
+								aria-expanded="${isFirstGroup}"
+								aria-controls="${collapseId}">
+							<div class="d-flex justify-content-between align-items-center">
+								<span>
+									<i class="${grupo.icono} me-2"></i>
+									<strong>${grupo.nombre}</strong>
+								</span>
+								<i class="bi bi-chevron-down"></i>
+							</div>
+						</button>
+					</h2>
+					
+					<div class="accordion-collapse collapse ${isFirstGroup ? 'show' : ''}" 
+						 id="${collapseId}"
+						 data-bs-parent="#accordionSidebar">
+						<div class="accordion-body p-0">
 			`;
 			
 			// Items del submenú
@@ -842,7 +837,11 @@ generarNavbar() {
 				`;
 			});
 			
-			menuHTML += '</div>'; // Cierre del collapse
+			menuHTML += `
+						</div>
+					</div>
+				</div>
+			`;
 		});
 		
 		return menuHTML;
