@@ -376,52 +376,59 @@ generarNavbar() {
 
 		return contenidoHTML;
 	}
- generarTablaConToolbar(tableId, modulo, moduloConfig) {
-    const tablaConfig = this.config.tablas;
-    const descripcion = moduloConfig.descripcion || `Gestión de ${moduloConfig.plural.toLowerCase()}`;
-    const textos = this.config.textos;
-    
-    return `
-        <!-- Toolbar personalizada -->
-        <div id="toolbar-${tableId}" class="custom-toolbar">
-            <div class="toolbar-content">
-                <!-- Título del módulo -->
-                <div class="toolbar-title-section">
-                    <h4 class="toolbar-title">
-                        <i class="${moduloConfig.icono || 'bi bi-box'} toolbar-icon"></i>
-                        ${moduloConfig.plural}
-                    </h4>
-                    <p class="toolbar-description">${descripcion}</p>
-                </div>
-            </div>
-        </div>
-        
-        <table id="${tableId}" 
-               class="${tablaConfig.clases.tabla}"
-               data-toggle="table"
-               data-toolbar="#toolbar-${tableId}"
-               data-modulo="${modulo}"
-               data-pagination="${tablaConfig.configuracionGlobal.pagination}"
-               data-search="false"
-               data-show-refresh="false"
-               data-show-columns="${tablaConfig.configuracionGlobal.showColumns}"
-               data-sort-name="${tablaConfig.configuracionGlobal.sortName}"
-               data-sort-order="${tablaConfig.configuracionGlobal.sortOrder}"
-               data-page-size="${tablaConfig.configuracionGlobal.pageSize}"
-               data-page-list="[${tablaConfig.configuracionGlobal.pageList.join(',')}]"
-               data-buttons="buttons"
-               data-buttons-prefix="btn">
-            <thead class="${tablaConfig.clases.cabecera}">
-                <tr>
-                    <!-- Las columnas se generan dinámicamente desde la configuración -->
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Los datos se cargan dinámicamente vía AJAX -->
-            </tbody>
-        </table>
-    `;
-}
+ 
+	generarTablaConToolbar(tableId, modulo, moduloConfig) {
+		const tablaConfig = this.config.tablas;
+		const descripcion = moduloConfig.descripcion || `Gestión de ${moduloConfig.plural.toLowerCase()}`;
+		const tieneFormulario = window.configManager && window.configManager.tieneFormulario(modulo);
+		
+		return `
+			<!-- Toolbar personalizada -->
+			<div id="toolbar-${tableId}" class="custom-toolbar">
+				<div class="toolbar-content">
+					<!-- Título del módulo -->
+					<div class="toolbar-title-section">
+						<h4 class="toolbar-title">
+							<i class="${moduloConfig.icono || 'bi bi-box'} toolbar-icon"></i>
+							${moduloConfig.plural}
+						</h4>
+						<p class="toolbar-description">${descripcion}</p>
+					</div>
+					
+					<!-- Botón Nuevo solo si tiene formulario -->
+					${tieneFormulario ? `
+					<div class="toolbar-actions">
+						<button type="button" 
+								class="btn btn-primary" 
+								onclick="abrirModal('${modulo}')">
+							<i class="bi bi-plus-circle me-1"></i>
+							Nuevo ${moduloConfig.singular}
+						</button>
+					</div>
+					` : ''}
+				</div>
+			</div>
+			
+			<table id="${tableId}" 
+				   class="${tablaConfig.clases.tabla}"
+				   data-toggle="table"
+				   data-toolbar="#toolbar-${tableId}"
+				   data-modulo="${modulo}"
+				   data-pagination="${tablaConfig.configuracionGlobal.pagination}"
+				   data-search="false"
+				   data-show-refresh="false"
+				   data-show-columns="${tablaConfig.configuracionGlobal.showColumns}"
+				   data-sort-name="${tablaConfig.configuracionGlobal.sortName}"
+				   data-sort-order="${tablaConfig.configuracionGlobal.sortOrder}"
+				   data-page-size="${tablaConfig.configuracionGlobal.pageSize}"
+				   data-page-list="[${tablaConfig.configuracionGlobal.pageList.join(',')}]">
+				<thead class="${tablaConfig.clases.cabecera}">
+					<tr></tr>
+				</thead>
+				<tbody></tbody>
+			</table>
+		`;
+	}
 
     // Generar modal usando configuración
     generarModal() {

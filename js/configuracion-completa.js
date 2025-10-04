@@ -338,107 +338,186 @@ const CONFIGURACION_SISTEMA = {
 
     // ===== CONFIGURACIÓN DE MÓDULOS =====
     modulos: {
-        categorias: {
-            singular: 'Categoría',
-            plural: 'Categorías',
-			icono: 'bi bi-tags-fill', // CAMBIAR
-            genero: 'femenino',
-            descripcion: 'Gestión de categorías de productos',
-            tabId: 'categorias',
-            tableId: 'tablaCategorias',
-            
-            columnasFormulario: [
-                { name: 'nombre', label: 'Nombre', type: 'text', required: true, placeholder: 'Nombre de la categoría' },
-                { name: 'descripcion', label: 'Descripción', type: 'textarea', required: false, placeholder: 'Descripción opcional' },
-                { name: 'categoria_padre_id', label: 'Categoría Padre', type: 'select', required: false, options: [] },
-                { name: 'activo', label: 'Activo', type: 'checkbox', required: false, checked: true }
-            ],
-            
-            columnasTablas: [
-                { field: 'id', title: 'ID', sortable: true, width: 80, align: 'center' },
-                { field: 'nombre', title: 'Nombre', sortable: true, width: 200 },
-                { field: 'descripcion', title: 'Descripción' },
-                { field: 'categoria_padre_nombre', title: 'Categoría Padre', width: 150 },
-                { field: 'activo', title: 'Estado', width: 100, align: 'center' },
-                { field: 'created_at', title: 'Creado', width: 120 },
-                { field: 'operate', title: 'Acciones', width: 120, align: 'center' }
-            ]
-        },
+		 // OPERACIONES
+		ventas: {
+			singular: 'Venta',
+			plural: 'Ventas',
+			icono: 'bi bi-cart-check-fill',
+			genero: 'femenino',
+			descripcion: 'Gestión de ventas y facturación',
+			tabId: 'ventas',
+			tableId: 'tablaVentas',
+			
+			// CONFIGURACIÓN DE ACCIONES DEL MÓDULO
+			acciones: [
+				{ id: 'ver', nombre: 'Ver Detalle', icono: 'bi bi-eye', clase: 'btn-info' },
+				{ id: 'imprimir', nombre: 'Imprimir', icono: 'bi bi-printer', clase: 'btn-secondary' },
+				{ id: 'anular', nombre: 'Anular', icono: 'bi bi-x-circle', clase: 'btn-danger', confirmacion: true }
+			],
+			
+			columnasTablas: [
+				{ field: 'id', title: 'ID', sortable: true, width: 80, align: 'center' },
+				{ field: 'numero_documento', title: 'N° Documento', sortable: true, width: 150 },
+				{ field: 'fecha_venta', title: 'Fecha', sortable: true, width: 150 },
+				{ field: 'cliente_nombre', title: 'Cliente', width: 200 },
+				{ field: 'subtotal', title: 'Subtotal', sortable: true, width: 120, align: 'right' },
+				{ field: 'iva', title: 'IVA', sortable: true, width: 100, align: 'right' },
+				{ field: 'total', title: 'Total', sortable: true, width: 120, align: 'right' },
+				{ field: 'estado_nombre', title: 'Estado', width: 120, align: 'center' },
+				{ field: 'operate', title: 'Acciones', sortable: false, width: 150, align: 'center' }
+			]
+		},
+		
+		turnos_caja: {
+			singular: 'Turno de Caja',
+			plural: 'Turnos de Caja',
+			icono: 'bi bi-clock-history',
+			genero: 'masculino',
+			descripcion: 'Control de turnos y cierres de caja',
+			tabId: 'turnos-caja',
+			tableId: 'tablaTurnosCaja',
+			
+			// CONFIGURACIÓN DE ACCIONES DEL MÓDULO
+			acciones: [
+				{ id: 'ver', nombre: 'Ver Detalle', icono: 'bi bi-eye', clase: 'btn-info' },
+				{ id: 'cerrar', nombre: 'Cerrar Turno', icono: 'bi bi-lock', clase: 'btn-warning', confirmacion: true },
+				{ id: 'imprimir', nombre: 'Imprimir', icono: 'bi bi-printer', clase: 'btn-secondary' }
+			],
+			
+			columnasTablas: [
+				{ field: 'id', title: 'ID', sortable: true, width: 80, align: 'center' },
+				{ field: 'caja_nombre', title: 'Caja', sortable: true, width: 150 },
+				{ field: 'usuario_nombre', title: 'Usuario', sortable: true, width: 150 },
+				{ field: 'fecha_apertura', title: 'Apertura', sortable: true, width: 150 },
+				{ field: 'fecha_cierre', title: 'Cierre', sortable: true, width: 150 },
+				{ field: 'monto_apertura', title: 'Monto Apertura', sortable: true, width: 130, align: 'right' },
+				{ field: 'monto_cierre', title: 'Monto Cierre', sortable: true, width: 130, align: 'right' },
+				{ field: 'estado_nombre', title: 'Estado', width: 120, align: 'center' },
+				{ field: 'operate', title: 'Acciones', sortable: false, width: 150, align: 'center' }
+			]
+		},
 
-        productos: {
-            singular: 'Producto',
-            plural: 'Productos',
-			icono: 'bi bi-box-seam-fill', // CAMBIAR
-            genero: 'masculino',
-            descripcion: 'Gestión de productos del inventario',
-            tabId: 'productos',
-            tableId: 'tablaProductos',
-            
-            columnasFormulario: [
-                { name: 'sku', label: 'SKU', type: 'text', required: true, placeholder: 'Código único del producto' },
-                { name: 'nombre', label: 'Nombre', type: 'text', required: true, placeholder: 'Nombre del producto' },
-                { name: 'descripcion', label: 'Descripción', type: 'textarea', required: false, placeholder: 'Descripción del producto' },
-                { name: 'precio_compra', label: 'Precio Compra', type: 'number', required: true, step: '0.01', min: '0' },
-                { name: 'precio_venta', label: 'Precio Venta', type: 'number', required: true, step: '0.01', min: '0' },
-                { name: 'unidad_medida', label: 'Unidad Medida', type: 'text', required: true, placeholder: 'kg, litros, unidades, etc.' },
-                { name: 'categoria_ids', label: 'Categorías', type: 'select-multiple', required: false, options: [] },
-                { name: 'tiene_iva', label: 'Aplica IVA', type: 'checkbox', required: false, checked: true },
-                { name: 'activo', label: 'Activo', type: 'checkbox', required: false, checked: true }
-            ],
-            
-            columnasTablas: [
-                { field: 'id', title: 'ID', sortable: true, width: 80, align: 'center' },
-                { field: 'sku', title: 'SKU', sortable: true, width: 120 },
-                { field: 'nombre', title: 'Nombre', sortable: true, width: 200 },
-                { field: 'descripcion', title: 'Descripción' },
-                { field: 'precio_compra', title: 'P. Compra', sortable: true, width: 100, align: 'right' },
-                { field: 'precio_venta', title: 'P. Venta', sortable: true, width: 100, align: 'right' },
-                { field: 'unidad_medida', title: 'Unidad', width: 100, align: 'center' },
-                { field: 'categorias', title: 'Categorías' },
-                { field: 'tiene_iva', title: 'IVA', width: 80, align: 'center' },
-                { field: 'activo', title: 'Estado', width: 100, align: 'center' },
-                { field: 'operate', title: 'Acciones', width: 120, align: 'center' }
-            ]
-        },
+		// MANTENEDORES
+		categorias: {
+			singular: 'Categoría',
+			plural: 'Categorías',
+			icono: 'bi bi-tags-fill',
+			genero: 'femenino',
+			descripcion: 'Gestión de categorías de productos',
+			tabId: 'categorias',
+			tableId: 'tablaCategorias',
+			
+			// CONFIGURACIÓN DE ACCIONES DEL MÓDULO (botones estándar)
+			acciones: [
+				{ id: 'editar', nombre: 'Editar', icono: 'bi bi-pencil-square', clase: 'btn-warning' },
+				{ id: 'eliminar', nombre: 'Eliminar', icono: 'bi bi-trash3', clase: 'btn-danger', confirmacion: true }
+			],
+			
+			columnasFormulario: [
+				{ name: 'nombre', label: 'Nombre', type: 'text', required: true, placeholder: 'Nombre de la categoría' },
+				{ name: 'descripcion', label: 'Descripción', type: 'textarea', required: false, placeholder: 'Descripción opcional' },
+				{ name: 'categoria_padre_id', label: 'Categoría Padre', type: 'select', required: false, options: [] },
+				{ name: 'activo', label: 'Activo', type: 'checkbox', required: false, checked: true }
+			],
+			
+			columnasTablas: [
+				{ field: 'id', title: 'ID', sortable: true, width: 80, align: 'center' },
+				{ field: 'nombre', title: 'Nombre', sortable: true, width: 200 },
+				{ field: 'descripcion', title: 'Descripción' },
+				{ field: 'categoria_padre_nombre', title: 'Categoría Padre', width: 150 },
+				{ field: 'activo', title: 'Estado', width: 100, align: 'center' },
+				{ field: 'created_at', title: 'Creado', width: 120 },
+				{ field: 'operate', title: 'Acciones', sortable: false, width: 120, align: 'center' }
+			]
+		},
 
-        usuarios: {
-            singular: 'Usuario',
-            plural: 'Usuarios',
-			icono: 'bi bi-people-fill', // CAMBIAR
-            genero: 'común',
-            descripcion: 'Gestión de usuarios del sistema',
-            tabId: 'usuarios',
-            tableId: 'tablaUsuarios',
-            
-            columnasFormulario: [
-                { name: 'username', label: 'Usuario', type: 'text', required: true, placeholder: 'Nombre de usuario' },
-                { name: 'password', label: 'Contraseña', type: 'password', required: true, placeholder: 'Contraseña' },
-                { name: 'nombre', label: 'Nombre', type: 'text', required: true, placeholder: 'Nombre real' },
-                { name: 'apellido', label: 'Apellido', type: 'text', required: true, placeholder: 'Apellido' },
-                { name: 'email', label: 'Email', type: 'email', required: true, placeholder: 'correo@ejemplo.com' },
-                { name: 'telefono', label: 'Teléfono', type: 'tel', required: false, placeholder: '+56 9 1234 5678' },
-                { name: 'rol', label: 'Rol', type: 'select', required: true, options: [
-                    { value: 'ADMIN', text: 'Administrador' },
-                    { value: 'CAJERO', text: 'Cajero' },
-                    { value: 'BODEGUERO', text: 'Bodeguero' },
-                    { value: 'SUPERVISOR', text: 'Supervisor' }
-                ]},
-                { name: 'activo', label: 'Activo', type: 'checkbox', required: false, checked: true }
-            ],
-            
-            columnasTablas: [
-                { field: 'id', title: 'ID', sortable: true, width: 80, align: 'center' },
-                { field: 'username', title: 'Usuario', sortable: true, width: 120 },
-                { field: 'nombre', title: 'Nombre', sortable: true, width: 120 },
-                { field: 'apellido', title: 'Apellido', sortable: true, width: 120 },
-                { field: 'email', title: 'Email', width: 200 },
-                { field: 'telefono', title: 'Teléfono', width: 120 },
-                { field: 'rol', title: 'Rol', sortable: true, width: 120 },
-                { field: 'activo', title: 'Estado', width: 100, align: 'center' },
-                { field: 'created_at', title: 'Creado', width: 120 },
-                { field: 'operate', title: 'Acciones', width: 120, align: 'center' }
-            ]
-        },
+		productos: {
+			singular: 'Producto',
+			plural: 'Productos',
+			icono: 'bi bi-box-seam-fill',
+			genero: 'masculino',
+			descripcion: 'Gestión de productos del inventario',
+			tabId: 'productos',
+			tableId: 'tablaProductos',
+			
+			// CONFIGURACIÓN DE ACCIONES DEL MÓDULO
+			acciones: [
+				{ id: 'editar', nombre: 'Editar', icono: 'bi bi-pencil-square', clase: 'btn-warning' },
+				{ id: 'ver', nombre: 'Ver Detalle', icono: 'bi bi-eye', clase: 'btn-info' },
+				{ id: 'eliminar', nombre: 'Eliminar', icono: 'bi bi-trash3', clase: 'btn-danger', confirmacion: true }
+			],
+			
+			columnasFormulario: [
+				{ name: 'sku', label: 'SKU', type: 'text', required: true, placeholder: 'Código único del producto' },
+				{ name: 'nombre', label: 'Nombre', type: 'text', required: true, placeholder: 'Nombre del producto' },
+				{ name: 'descripcion', label: 'Descripción', type: 'textarea', required: false, placeholder: 'Descripción del producto' },
+				{ name: 'precio_compra', label: 'Precio Compra', type: 'number', required: true, step: '0.01', min: '0' },
+				{ name: 'precio_venta', label: 'Precio Venta', type: 'number', required: true, step: '0.01', min: '0' },
+				{ name: 'unidad_medida', label: 'Unidad Medida', type: 'text', required: true, placeholder: 'kg, litros, unidades, etc.' },
+				{ name: 'categoria_ids', label: 'Categorías', type: 'select-multiple', required: false, options: [] },
+				{ name: 'tiene_iva', label: 'Aplica IVA', type: 'checkbox', required: false, checked: true },
+				{ name: 'activo', label: 'Activo', type: 'checkbox', required: false, checked: true }
+			],
+			
+			columnasTablas: [
+				{ field: 'id', title: 'ID', sortable: true, width: 80, align: 'center' },
+				{ field: 'sku', title: 'SKU', sortable: true, width: 120 },
+				{ field: 'nombre', title: 'Nombre', sortable: true, width: 200 },
+				{ field: 'descripcion', title: 'Descripción' },
+				{ field: 'precio_compra', title: 'P. Compra', sortable: true, width: 100, align: 'right' },
+				{ field: 'precio_venta', title: 'P. Venta', sortable: true, width: 100, align: 'right' },
+				{ field: 'unidad_medida', title: 'Unidad', width: 100, align: 'center' },
+				{ field: 'categorias', title: 'Categorías' },
+				{ field: 'tiene_iva', title: 'IVA', width: 80, align: 'center' },
+				{ field: 'activo', title: 'Estado', width: 100, align: 'center' },
+				{ field: 'operate', title: 'Acciones', sortable: false, width: 150, align: 'center' }
+			]
+		},
+
+		usuarios: {
+			singular: 'Usuario',
+			plural: 'Usuarios',
+			icono: 'bi bi-people-fill',
+			genero: 'común',
+			descripcion: 'Gestión de usuarios del sistema',
+			tabId: 'usuarios',
+			tableId: 'tablaUsuarios',
+			
+			// CONFIGURACIÓN DE ACCIONES DEL MÓDULO
+			acciones: [
+				{ id: 'editar', nombre: 'Editar', icono: 'bi bi-pencil-square', clase: 'btn-warning' },
+				{ id: 'eliminar', nombre: 'Eliminar', icono: 'bi bi-trash3', clase: 'btn-danger', confirmacion: true }
+			],
+			
+			columnasFormulario: [
+				{ name: 'username', label: 'Usuario', type: 'text', required: true, placeholder: 'Nombre de usuario' },
+				{ name: 'password', label: 'Contraseña', type: 'password', required: true, placeholder: 'Contraseña' },
+				{ name: 'nombre', label: 'Nombre', type: 'text', required: true, placeholder: 'Nombre real' },
+				{ name: 'apellido', label: 'Apellido', type: 'text', required: true, placeholder: 'Apellido' },
+				{ name: 'email', label: 'Email', type: 'email', required: true, placeholder: 'correo@ejemplo.com' },
+				{ name: 'telefono', label: 'Teléfono', type: 'tel', required: false, placeholder: '+56 9 1234 5678' },
+				{ name: 'rol', label: 'Rol', type: 'select', required: true, options: [
+					{ value: 'ADMIN', text: 'Administrador' },
+					{ value: 'CAJERO', text: 'Cajero' },
+					{ value: 'BODEGUERO', text: 'Bodeguero' },
+					{ value: 'SUPERVISOR', text: 'Supervisor' }
+				]},
+				{ name: 'activo', label: 'Activo', type: 'checkbox', required: false, checked: true }
+			],
+			
+			columnasTablas: [
+				{ field: 'id', title: 'ID', sortable: true, width: 80, align: 'center' },
+				{ field: 'username', title: 'Usuario', sortable: true, width: 120 },
+				{ field: 'nombre', title: 'Nombre', sortable: true, width: 120 },
+				{ field: 'apellido', title: 'Apellido', sortable: true, width: 120 },
+				{ field: 'email', title: 'Email', width: 200 },
+				{ field: 'telefono', title: 'Teléfono', width: 120 },
+				{ field: 'rol', title: 'Rol', sortable: true, width: 120 },
+				{ field: 'activo', title: 'Estado', width: 100, align: 'center' },
+				{ field: 'created_at', title: 'Creado', width: 120 },
+				{ field: 'operate', title: 'Acciones', sortable: false, width: 120, align: 'center' }
+			]
+		},
 
         proveedores: {
             singular: 'Proveedor',
@@ -448,6 +527,12 @@ const CONFIGURACION_SISTEMA = {
             descripcion: 'Gestión de proveedores',
             tabId: 'proveedores',
             tableId: 'tablaProveedores',
+			
+			// CONFIGURACIÓN DE ACCIONES DEL MÓDULO
+			acciones: [
+				{ id: 'editar', nombre: 'Editar', icono: 'bi bi-pencil-square', clase: 'btn-warning' },
+				{ id: 'eliminar', nombre: 'Eliminar', icono: 'bi bi-trash3', clase: 'btn-danger', confirmacion: true }
+			],
             
             columnasFormulario: [
                 { name: 'nombre', label: 'Nombre', type: 'text', required: true, placeholder: 'Nombre del proveedor' },
@@ -461,12 +546,12 @@ const CONFIGURACION_SISTEMA = {
             columnasTablas: [
                 { field: 'id', title: 'ID', sortable: true, width: 80, align: 'center' },
                 { field: 'nombre', title: 'Nombre', sortable: true, width: 200 },
-                { field: 'rut', title: 'RUT', width: 120 },
-                { field: 'telefono', title: 'Teléfono', width: 120 },
-                { field: 'email', title: 'Email', width: 200 },
-                { field: 'direccion', title: 'Dirección' },
-                { field: 'activo', title: 'Estado', width: 100, align: 'center' },
-                { field: 'created_at', title: 'Creado', width: 120 },
+                { field: 'rut', title: 'RUT', sortable: true, width: 120 },
+                { field: 'telefono', title: 'Teléfono', sortable: true, width: 120 },
+                { field: 'email', title: 'Email', sortable: true, width: 200 },
+                { field: 'direccion', title: 'Dirección', sortable: true },
+                { field: 'activo', title: 'Estado', sortable: true, width: 100, align: 'center' },
+                { field: 'created_at', title: 'Creado', sortable: true, width: 120 },
                 { field: 'operate', title: 'Acciones', width: 120, align: 'center' }
             ]
         },
@@ -479,6 +564,12 @@ const CONFIGURACION_SISTEMA = {
             descripcion: 'Gestión de bodegas de almacenamiento',
             tabId: 'bodegas',
             tableId: 'tablaBodegas',
+			
+			// CONFIGURACIÓN DE ACCIONES DEL MÓDULO
+			acciones: [
+				{ id: 'editar', nombre: 'Editar', icono: 'bi bi-pencil-square', clase: 'btn-warning' },
+				{ id: 'eliminar', nombre: 'Eliminar', icono: 'bi bi-trash3', clase: 'btn-danger', confirmacion: true }
+			],
             
             columnasFormulario: [
                 { name: 'nombre', label: 'Nombre', type: 'text', required: true, placeholder: 'Nombre de la bodega' },
@@ -491,11 +582,11 @@ const CONFIGURACION_SISTEMA = {
             columnasTablas: [
                 { field: 'id', title: 'ID', sortable: true, width: 80, align: 'center' },
                 { field: 'nombre', title: 'Nombre', sortable: true, width: 150 },
-                { field: 'codigo', title: 'Código', width: 100, align: 'center' },
-                { field: 'direccion', title: 'Dirección' },
-                { field: 'es_principal', title: 'Principal', width: 100, align: 'center' },
-                { field: 'activa', title: 'Estado', width: 100, align: 'center' },
-                { field: 'created_at', title: 'Creado', width: 120 },
+                { field: 'codigo', title: 'Código', sortable: true, width: 100, align: 'center' },
+                { field: 'direccion', title: 'Dirección', sortable: true },
+                { field: 'es_principal', title: 'Principal', sortable: true, width: 100, align: 'center' },
+                { field: 'activa', title: 'Estado', sortable: true, width: 100, align: 'center' },
+                { field: 'created_at', title: 'Creado', sortable: true, width: 120 },
                 { field: 'operate', title: 'Acciones', width: 120, align: 'center' }
             ]
         },
@@ -508,6 +599,12 @@ const CONFIGURACION_SISTEMA = {
             descripcion: 'Gestión de cajas registradoras',
             tabId: 'cajas',
             tableId: 'tablaCajas',
+			
+			// CONFIGURACIÓN DE ACCIONES DEL MÓDULO
+			acciones: [
+				{ id: 'editar', nombre: 'Editar', icono: 'bi bi-pencil-square', clase: 'btn-warning' },
+				{ id: 'eliminar', nombre: 'Eliminar', icono: 'bi bi-trash3', clase: 'btn-danger', confirmacion: true }
+			],
             
             columnasFormulario: [
                 { name: 'nombre', label: 'Nombre', type: 'text', required: true, placeholder: 'Nombre de la caja' },
@@ -519,10 +616,10 @@ const CONFIGURACION_SISTEMA = {
             columnasTablas: [
                 { field: 'id', title: 'ID', sortable: true, width: 80, align: 'center' },
                 { field: 'nombre', title: 'Nombre', sortable: true, width: 150 },
-                { field: 'codigo', title: 'Código', width: 100, align: 'center' },
-                { field: 'bodega_nombre', title: 'Bodega', width: 150 },
-                { field: 'activa', title: 'Estado', width: 100, align: 'center' },
-                { field: 'created_at', title: 'Creado', width: 120 },
+                { field: 'codigo', title: 'Código', sortable: true, width: 100, align: 'center' },
+                { field: 'bodega_nombre', title: 'Bodega', sortable: true, width: 150 },
+                { field: 'activa', title: 'Estado', sortable: true, width: 100, align: 'center' },
+                { field: 'created_at', title: 'Creado', sortable: true, width: 120 },
                 { field: 'operate', title: 'Acciones', width: 120, align: 'center' }
             ]
         },
@@ -535,6 +632,12 @@ const CONFIGURACION_SISTEMA = {
             descripcion: 'Gestión de estados del sistema',
             tabId: 'estados',
             tableId: 'tablaEstados',
+			
+			// CONFIGURACIÓN DE ACCIONES DEL MÓDULO
+			acciones: [
+				{ id: 'editar', nombre: 'Editar', icono: 'bi bi-pencil-square', clase: 'btn-warning' },
+				{ id: 'eliminar', nombre: 'Eliminar', icono: 'bi bi-trash3', clase: 'btn-danger', confirmacion: true }
+			],
             
             columnasFormulario: [
                 { name: 'modulo', label: 'Módulo', type: 'select', required: true, options: [
@@ -553,11 +656,11 @@ const CONFIGURACION_SISTEMA = {
             columnasTablas: [
                 { field: 'id', title: 'ID', sortable: true, width: 80, align: 'center' },
                 { field: 'modulo', title: 'Módulo', sortable: true, width: 120 },
-                { field: 'codigo', title: 'Código', width: 120 },
+                { field: 'codigo', title: 'Código', sortable: true, width: 120 },
                 { field: 'nombre', title: 'Nombre', sortable: true, width: 150 },
-                { field: 'descripcion', title: 'Descripción' },
-                { field: 'orden', title: 'Orden', width: 80, align: 'center' },
-                { field: 'es_activo', title: 'Estado', width: 100, align: 'center' },
+                { field: 'descripcion', title: 'Descripción', sortable: true },
+                { field: 'orden', title: 'Orden', sortable: true, width: 80, align: 'center' },
+                { field: 'es_activo', title: 'Estado', sortable: true, width: 100, align: 'center' },
                 { field: 'operate', title: 'Acciones', width: 120, align: 'center' }
             ]
         },
@@ -570,6 +673,12 @@ const CONFIGURACION_SISTEMA = {
             descripcion: 'Gestión de tipos de documentos',
             tabId: 'tipos-documento',
             tableId: 'tablaTiposDocumento',
+			
+			// CONFIGURACIÓN DE ACCIONES DEL MÓDULO
+			acciones: [
+				{ id: 'editar', nombre: 'Editar', icono: 'bi bi-pencil-square', clase: 'btn-warning' },
+				{ id: 'eliminar', nombre: 'Eliminar', icono: 'bi bi-trash3', clase: 'btn-danger', confirmacion: true }
+			],
             
             columnasFormulario: [
                 { name: 'codigo', label: 'Código', type: 'text', required: true, placeholder: 'Código único' },
@@ -583,13 +692,13 @@ const CONFIGURACION_SISTEMA = {
             
             columnasTablas: [
                 { field: 'id', title: 'ID', sortable: true, width: 80, align: 'center' },
-                { field: 'codigo', title: 'Código', width: 100, align: 'center' },
+                { field: 'codigo', title: 'Código', sortable: true, width: 100, align: 'center' },
                 { field: 'nombre', title: 'Nombre', sortable: true, width: 150 },
-                { field: 'descripcion', title: 'Descripción' },
-                { field: 'requiere_cliente', title: 'Requiere Cliente', width: 120, align: 'center' },
-                { field: 'serie', title: 'Serie', width: 80, align: 'center' },
-                { field: 'correlativo_actual', title: 'Correlativo', width: 100, align: 'center' },
-                { field: 'activo', title: 'Estado', width: 100, align: 'center' },
+                { field: 'descripcion', title: 'Descripción', sortable: true },
+                { field: 'requiere_cliente', title: 'Requiere Cliente', sortable: true, width: 120, align: 'center' },
+                { field: 'serie', title: 'Serie', width: 80, align: 'center', sortable: true },
+                { field: 'correlativo_actual', title: 'Correlativo', sortable: true, width: 100, align: 'center' },
+                { field: 'activo', title: 'Estado', width: 100, sortable: true, align: 'center' },
                 { field: 'operate', title: 'Acciones', width: 120, align: 'center' }
             ]
         },
@@ -602,6 +711,12 @@ const CONFIGURACION_SISTEMA = {
             descripcion: 'Gestión de tipos de promociones',
             tabId: 'tipos-promocion',
             tableId: 'tablaTiposPromocion',
+			
+			// CONFIGURACIÓN DE ACCIONES DEL MÓDULO
+			acciones: [
+				{ id: 'editar', nombre: 'Editar', icono: 'bi bi-pencil-square', clase: 'btn-warning' },
+				{ id: 'eliminar', nombre: 'Eliminar', icono: 'bi bi-trash3', clase: 'btn-danger', confirmacion: true }
+			],
             
             columnasFormulario: [
                 { name: 'codigo', label: 'Código', type: 'text', required: true, placeholder: 'Código único' },
@@ -615,9 +730,9 @@ const CONFIGURACION_SISTEMA = {
                 { field: 'id', title: 'ID', sortable: true, width: 80, align: 'center' },
                 { field: 'codigo', title: 'Código', width: 120 },
                 { field: 'nombre', title: 'Nombre', sortable: true, width: 150 },
-                { field: 'descripcion', title: 'Descripción' },
-                { field: 'formula', title: 'Fórmula' },
-                { field: 'activo', title: 'Estado', width: 100, align: 'center' },
+                { field: 'descripcion', title: 'Descripción', sortable: true },
+                { field: 'formula', title: 'Fórmula', sortable: true },
+                { field: 'activo', title: 'Estado', sortable: true, width: 100, align: 'center' },
                 { field: 'operate', title: 'Acciones', width: 120, align: 'center' }
             ]
         },
@@ -630,6 +745,12 @@ const CONFIGURACION_SISTEMA = {
             descripcion: 'Gestión de métodos de pago',
             tabId: 'metodos-pago',
             tableId: 'tablaMetodosPago',
+			
+			// CONFIGURACIÓN DE ACCIONES DEL MÓDULO
+			acciones: [
+				{ id: 'editar', nombre: 'Editar', icono: 'bi bi-pencil-square', clase: 'btn-warning' },
+				{ id: 'eliminar', nombre: 'Eliminar', icono: 'bi bi-trash3', clase: 'btn-danger', confirmacion: true }
+			],
             
             columnasFormulario: [
                 { name: 'codigo', label: 'Código', type: 'text', required: true, placeholder: 'Código único' },
@@ -642,12 +763,12 @@ const CONFIGURACION_SISTEMA = {
             
             columnasTablas: [
                 { field: 'id', title: 'ID', sortable: true, width: 80, align: 'center' },
-                { field: 'codigo', title: 'Código', width: 120 },
+                { field: 'codigo', title: 'Código', sortable: true, width: 120 },
                 { field: 'nombre', title: 'Nombre', sortable: true, width: 150 },
-                { field: 'descripcion', title: 'Descripción' },
-                { field: 'requiere_referencia', title: 'Requiere Ref.', width: 120, align: 'center' },
-                { field: 'orden', title: 'Orden', width: 80, align: 'center' },
-                { field: 'activo', title: 'Estado', width: 100, align: 'center' },
+                { field: 'descripcion', title: 'Descripción', sortable: true },
+                { field: 'requiere_referencia', title: 'Requiere Ref.', sortable: true, width: 120, align: 'center' },
+                { field: 'orden', title: 'Orden', sortable: true, width: 80, align: 'center' },
+                { field: 'activo', title: 'Estado', sortable: true, width: 100, align: 'center' },
                 { field: 'operate', title: 'Acciones', width: 120, align: 'center' }
             ]
         }

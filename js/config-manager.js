@@ -330,6 +330,26 @@ class ConfigManager {
 			word.charAt(0).toUpperCase() + word.slice(1)
 		).join('');
 	}
+		
+		
+		// Obtener acciones de un módulo
+	getAccionesModulo(modulo) {
+		const config = this.getModuloConfig(modulo);
+		if (!config || !config.acciones) {
+			// Si no tiene acciones definidas, retornar acciones por defecto
+			return [
+				{ id: 'editar', nombre: 'Editar', icono: 'bi bi-pencil-square', clase: 'btn-warning' },
+				{ id: 'eliminar', nombre: 'Eliminar', icono: 'bi bi-trash3', clase: 'btn-danger', confirmacion: true }
+			];
+		}
+		return config.acciones;
+	}
+
+	// Verificar si tiene formulario (para saber si es mantenedor con CRUD)
+	tieneFormulario(modulo) {
+		const config = this.getModuloConfig(modulo);
+		return !!(config && config.columnasFormulario && config.columnasFormulario.length > 0);
+	}
 }
 
 // INICIALIZACIÓN INMEDIATA (no esperar DOMContentLoaded)

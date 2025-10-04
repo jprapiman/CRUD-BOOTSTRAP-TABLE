@@ -34,6 +34,7 @@ class ApiRouter {
         $validModules = [
             'categorias', 'productos', 'usuarios', 'bodegas', 
             'cajas', 'estados', 'tipos_documento', 'tipos_promocion', 'metodos_pago', 'proveedores'
+			, 'ventas', 'turnos_caja'
         ];
         
         if (empty($this->module)) {
@@ -70,65 +71,100 @@ class ApiRouter {
             $this->sendResponse(500, 'Error: ' . $e->getMessage());
         }
     }
+	private function handleGet() {
+		$moduleKey = str_replace('-', '_', $this->module);
+		
+		$queriesModule = $this->getQueriesForModule($moduleKey);
+		
+		if (!$queriesModule) {
+			$this->sendResponse(400, 'Módulo no implementado: ' . $this->module);
+			return;
+		}
+		
+		if (!isset($queriesModule['listar'])) {
+			$this->sendResponse(400, 'Método listar no implementado para: ' . $this->module);
+			return;
+		}
+		
+		$query = $queriesModule['listar'];
+		
+		try {
+			$stmt = $this->db->prepare($query);
+			$stmt->execute();
+			$data = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    private function handleGet() {
-        $moduleKey = str_replace('-', '_', $this->module);
-        
-        // Obtener las consultas usando un método más seguro
-        $queriesModule = $this->getQueriesForModule($moduleKey);
-        
-        if (!$queriesModule) {
-            $this->sendResponse(400, 'Módulo no implementado: ' . $this->module);
-            return;
-        }
-        
-        if (!isset($queriesModule['listar'])) {
-            $this->sendResponse(400, 'Método listar no implementado para: ' . $this->module);
-            return;
-        }
-        
-        $query = $queriesModule['listar'];
-        
-        try {
-            $stmt = $this->db->prepare($query);
-            $stmt->execute();
-            $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+			// Parámetros de Bootstrap Table
+			$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+			$limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 10;
+			$offset = isset($_GET['offset']) ? (int)$_GET['offset'] : 0;
+			$search = isset($_GET['search']) ? trim($_GET['search']) : '';
+			$sort = isset($_GET['sort']) ? $_GET['sort'] : 'id';
+			$order = isset($_GET['order']) ? strtoupper($_GET['order']) : 'ASC';
+			
+			// Aplicar búsqueda si existe
+			if (!empty($search)) {
+				$data = array_filter($data, function($item) use ($search) {
+					foreach ($item as $value) {
+						if (is_string($value) && stripos($value, $search) !== false) {
+							return true;
+						}
+					}
+					return false;
+				});
+				$data = array_values($data);
+			}
+			
+			// APLICAR ORDENAMIENTO
+			if (!empty($sort) && count($data) > 0) {
+				usort($data, function($a, $b) use ($sort, $order) {
+					// Verificar si la columna existe en ambos registros
+					if (!isset($a[$sort]) || !isset($b[$sort])) {
+						return 0;
+					}
+					
+					$valueA = $a[$sort];
+					$valueB = $b[$sort];
+					
+					// Manejo especial para valores nulos
+					if ($valueA === null && $valueB === null) return 0;
+					if ($valueA === null) return ($order === 'ASC') ? 1 : -1;
+					if ($valueB === null) return ($order === 'ASC') ? -1 : 1;
+					
+					// Comparación numérica si ambos valores son numéricos
+					if (is_numeric($valueA) && is_numeric($valueB)) {
+						$comparison = $valueA <=> $valueB;
+					} 
+					// Comparación de strings (case-insensitive)
+					else {
+						$comparison = strcasecmp($valueA, $valueB);
+					}
+					
+					return ($order === 'DESC') ? -$comparison : $comparison;
+				});
+			}
+			
+			$total = count($data);
+			
+			// Calcular página correctamente
+			if ($offset > 0) {
+				$page = floor($offset / $limit) + 1;
+			}
+			
+			$paginated_data = array_slice($data, $offset, $limit);
 
-            // Parámetros de Bootstrap Table
-            $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-            $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 10;
-            $search = isset($_GET['search']) ? trim($_GET['search']) : '';
-            
-            // Aplicar búsqueda si existe
-            if (!empty($search)) {
-                $data = array_filter($data, function($item) use ($search) {
-                    foreach ($item as $value) {
-                        if (is_string($value) && stripos($value, $search) !== false) {
-                            return true;
-                        }
-                    }
-                    return false;
-                });
-                $data = array_values($data);
-            }
-            
-            $total = count($data);
-            $offset = ($page - 1) * $limit;
-            $paginated_data = array_slice($data, $offset, $limit);
-
-            $this->sendResponse(200, 'Datos obtenidos', [
-                'data' => $paginated_data,
-                'total' => $total,
-                'page' => $page,
-                'limit' => $limit,
-                'totalPages' => ceil($total / $limit)
-            ]);
-            
-        } catch (PDOException $e) {
-            error_log("Error en handleGet: " . $e->getMessage());
-            $this->sendResponse(500, 'Error al obtener datos: ' . $e->getMessage());
-        }
-    }
+			$this->sendResponse(200, 'Datos obtenidos', [
+				'data' => $paginated_data,
+				'total' => $total,
+				'page' => $page,
+				'limit' => $limit,
+				'totalPages' => ceil($total / $limit)
+			]);
+			
+		} catch (PDOException $e) {
+			error_log("Error en handleGet: " . $e->getMessage());
+			$this->sendResponse(500, 'Error al obtener datos: ' . $e->getMessage());
+		}
+	}
 
     private function getQueriesForModule($moduleKey) {
         // Método seguro para obtener las consultas por módulo
@@ -142,7 +178,9 @@ class ApiRouter {
             'tipos_documento' => 'tipos_documento',
             'tipos_promocion' => 'tipos_promocion',
             'metodos_pago' => 'metodos_pago',
-            'proveedores' => 'proveedores'
+            'proveedores' => 'proveedores',
+            'ventas' => 'ventas',
+            'turnos_caja' => 'turnos_caja'
         ];
         
         if (isset($methods[$moduleKey]) && method_exists($this->queries, $methods[$moduleKey])) {

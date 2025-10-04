@@ -73,90 +73,112 @@ class TableManager {
         this.intentarInicializarTabla = this.intentarInicializarTabla.bind(this);
     }
 
-    inicializarTabla(tableId, modulo, columns) {
-        console.log(`🔄 Inicializando tabla ${tableId} para módulo ${modulo}`);
-        
-        try {
-            if (typeof $.fn.bootstrapTable === 'undefined') {
-                throw new Error('Bootstrap Table no está disponible');
-            }
+	inicializarTabla(tableId, modulo, columns) {
+		console.log(`🔄 Inicializando tabla ${tableId} para módulo ${modulo}`);
+		
+		try {
+			if (typeof $.fn.bootstrapTable === 'undefined') {
+				throw new Error('Bootstrap Table no está disponible');
+			}
 
-            const columnsConFormatters = this.aplicarFormateadores(columns, modulo);
-            
-            this.tables[tableId] = {
-                modulo: modulo,
-                columns: columnsConFormatters,
-                dataLoaded: false
-            };
+			const columnsConFormatters = this.aplicarFormateadores(columns, modulo);
+			
+			this.tables[tableId] = {
+				modulo: modulo,
+				columns: columnsConFormatters,
+				dataLoaded: false
+			};
 
-            const tableElement = $(`#${tableId}`);
-            
-            if (tableElement.data('bootstrap.table')) {
-                tableElement.bootstrapTable('destroy');
-            }
+			const tableElement = $(`#${tableId}`);
+			
+			if (tableElement.data('bootstrap.table')) {
+				tableElement.bootstrapTable('destroy');
+			}
 
-            const tableConfig = {
-                url: `api/router.php`,
-                method: 'GET',
-                sidePagination: 'server',
-                pagination: true,
-                pageSize: 10,
-                pageList: [10, 25, 50, 100],
-                search: true,
-                showColumns: true,
-                showRefresh: true,
-                columns: columnsConFormatters,
-                queryParams: function(params) {
-                    return {
-                        module: modulo,
-                        limit: params.limit,
-                        offset: params.offset,
-                        page: params.offset / params.limit + 1,
-                        search: params.search,
-                        sort: params.sort,
-                        order: params.order
-                    };
-                },
-                responseHandler: function(res) {
-                    console.log(`📊 Respuesta recibida para ${tableId}:`, res);
-                    if (res && res.success) {
-                        return {
-                            total: res.total || 0,
-                            rows: res.data || [],
+			const tableConfig = {
+				url: `api/router.php`,
+				method: 'GET',
+				sidePagination: 'server',
+				pagination: true,
+				pageSize: 10,
+				pageList: [10, 25, 50, 100],
+				search: true,
+				showColumns: true,
+				showRefresh: true,
+				sortable: true,
+				sortName: 'id',
+				sortOrder: 'asc',
+				columns: columnsConFormatters,
+				queryParams: function(params) {
+					console.log('📤 Query params originales:', params);
+					
+					const queryParams = {
+						module: modulo,
+						limit: params.limit,
+						offset: params.offset,
+						page: Math.floor(params.offset / params.limit) + 1,
+						search: params.search || '',
+						sort: params.sort || 'id',
+						order: params.order || 'asc'
+					};
+					
+					console.log('📤 Query params enviados:', queryParams);
+					return queryParams;
+				},
+				responseHandler: function(res) {
+					console.log(`📊 Respuesta recibida para ${tableId}:`, res);
+					if (res && res.success) {
+						return {
+							total: res.total || 0,
+							rows: res.data || [],
 							module: modulo
-                        };
-                    }
-                    console.warn(`⚠️ Respuesta sin éxito para ${tableId}:`, res);
-                    return { total: 0, rows: [] };
-                },
-                onLoadSuccess: (data) => {
-                    console.log(`✅ Datos cargados para tabla: ${tableId}`, data);
-                    this.tables[tableId].dataLoaded = true;
-                    
-                    setTimeout(() => {
-                        this.inicializarTooltips();
-                    }, 100);
-                },
-                onLoadError: (status, jqXHR) => {
-                    console.error(`❌ Error cargando tabla ${tableId}:`, status, jqXHR);
-                    if (window.mostrarNotificacion) {
-                        window.mostrarNotificacion(`Error cargando datos para ${modulo}`, 'error');
-                    }
-                },
-                onPostBody: () => {
-                    console.log(`✅ Tabla ${tableId} renderizada correctamente`);
-                }
-            };
+						};
+					}
+					console.warn(`⚠️ Respuesta sin éxito para ${tableId}:`, res);
+					return { total: 0, rows: [] };
+				},
+				onLoadSuccess: (data) => {
+					console.log(`✅ Datos cargados para tabla: ${tableId}`, data);
+					console.log('📊 Configuración de ordenamiento:', {
+						sortName: tableElement.bootstrapTable('getOptions').sortName,
+						sortOrder: tableElement.bootstrapTable('getOptions').sortOrder
+					});
+					
+					this.tables[tableId].dataLoaded = true;
+					
+					setTimeout(() => {
+						this.inicializarTooltips();
+					}, 100);
+				},
+				onLoadError: (status, jqXHR) => {
+					console.error(`❌ Error cargando tabla ${tableId}:`, status, jqXHR);
+					if (window.mostrarNotificacion) {
+						window.mostrarNotificacion(`Error cargando datos para ${modulo}`, 'error');
+					}
+				},
+				onPostBody: () => {
+					console.log(`✅ Tabla ${tableId} renderizada correctamente`);
+				},
+				onSort: (name, order) => {
+					console.log(`🔄 Ordenando por: ${name} (${order})`);
+				},
+				onClickCell: function(field, value, row, $element) {
+					// Prevenir ordenamiento al hacer clic en la columna de acciones
+					if (field === 'operate') {
+						return false;
+					}
+				}
+			};
 
-            tableElement.bootstrapTable(tableConfig);
-            console.log(`✅ Tabla ${tableId} inicializada correctamente`);
+			tableElement.bootstrapTable(tableConfig);
+			console.log(`✅ Tabla ${tableId} inicializada correctamente`);
 
-        } catch (error) {
-            console.error(`❌ Error crítico inicializando tabla ${tableId}:`, error);
-            this.mostrarErrorTabla(modulo, tableId, error.message);
-            throw error;
-        }
-    }
+		} catch (error) {
+			console.error(`❌ Error crítico inicializando tabla ${tableId}:`, error);
+			this.mostrarErrorTabla(modulo, tableId, error.message);
+			throw error;
+		}
+	}
 
     inicializarTooltips() {
         if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
@@ -337,31 +359,33 @@ class TableManager {
     }
 
    operateFormatter(row, modulo) {
-		const nombreModulo = window.configManager ? 
-			window.configManager.getNombreModulo(modulo) : 
-			modulo;
+		const acciones = window.configManager ? 
+			window.configManager.getAccionesModulo(modulo) : 
+			[
+				{ id: 'editar', nombre: 'Editar', icono: 'bi bi-pencil-square', clase: 'btn-warning' },
+				{ id: 'eliminar', nombre: 'Eliminar', icono: 'bi bi-trash3', clase: 'btn-danger' }
+			];
 		
-		return `
-			<div class="btn-group btn-group-sm" role="group" aria-label="Acciones para ${nombreModulo}">
+		let botonesHTML = '<div class="btn-group btn-group-sm" role="group">';
+		
+		acciones.forEach(accion => {
+			const claseBtn = accion.clase || 'btn-secondary';
+			
+			botonesHTML += `
 				<button type="button" 
-						class="btn btn-outline-warning" 
-						onclick="editar('${modulo}', ${row.id})" 
-						title="Editar ${nombreModulo}"
-						data-bs-toggle="tooltip"
-						data-bs-placement="top">
-					<i class="bi bi-pencil-square"></i>
+						class="btn ${claseBtn}" 
+						onclick="ejecutarAccion('${modulo}', '${accion.id}', ${row.id}, ${accion.confirmacion || false})" 
+						title="${accion.nombre}"
+						data-bs-toggle="tooltip">
+					<i class="${accion.icono}"></i>
 				</button>
-				<button type="button" 
-						class="btn btn-outline-danger" 
-						onclick="eliminar('${modulo}', ${row.id})" 
-						title="Eliminar ${nombreModulo}"
-						data-bs-toggle="tooltip"
-						data-bs-placement="top">
-					<i class="bi bi-trash3"></i>
-				</button>
-			</div>
-		`;
+			`;
+		});
+		
+		botonesHTML += '</div>';
+		return botonesHTML;
 	}
+
    
     rolFormatter(value) {
         const colores = {
@@ -1088,5 +1112,89 @@ window.buttons = {
         }
     }
 };
+
+// Función unificada para ejecutar acciones
+function ejecutarAccion(modulo, accion, id, requiereConfirmacion = false) {
+    console.log(`Ejecutando acción: ${accion} en ${modulo} #${id}`);
+    
+    // Manejo de confirmación
+    if (requiereConfirmacion) {
+        const nombreModulo = window.configManager ? 
+            window.configManager.getNombreModulo(modulo) : modulo;
+        
+        const mensajes = {
+            'eliminar': `¿Está seguro de eliminar este ${nombreModulo.toLowerCase()}?`,
+            'anular': `¿Está seguro de anular esta ${nombreModulo.toLowerCase()}?`,
+            'cerrar': `¿Está seguro de cerrar este ${nombreModulo.toLowerCase()}?`
+        };
+        
+        const mensaje = mensajes[accion] || `¿Está seguro de realizar esta acción?`;
+        
+        if (!confirm(mensaje)) {
+            return;
+        }
+    }
+    
+    // Ejecutar acción según el tipo
+    switch(accion) {
+        case 'editar':
+            editar(modulo, id);
+            break;
+        case 'eliminar':
+            eliminar(modulo, id);
+            break;
+        case 'ver':
+            verDetalle(modulo, id);
+            break;
+        case 'imprimir':
+            imprimir(modulo, id);
+            break;
+        case 'anular':
+            anular(modulo, id);
+            break;
+        case 'cerrar':
+            cerrarTurno(modulo, id);
+            break;
+        default:
+            console.warn(`Acción '${accion}' no está implementada`);
+            mostrarNotificacion(`Acción ${accion} no implementada`, 'info');
+    }
+}
+
+// Funciones específicas de acciones
+function verDetalle(modulo, id) {
+    console.log(`Ver detalle: ${modulo} #${id}`);
+    mostrarNotificacion(`Ver detalle de ${modulo} #${id} - Por implementar`, 'info');
+}
+
+function imprimir(modulo, id) {
+    console.log(`Imprimir: ${modulo} #${id}`);
+    mostrarNotificacion(`Imprimir ${modulo} #${id} - Por implementar`, 'info');
+}
+
+async function anular(modulo, id) {
+    console.log(`Anular: ${modulo} #${id}`);
+    try {
+        // Aquí harías la llamada al API para anular
+        mostrarNotificacion(`${modulo} #${id} anulado correctamente`, 'success');
+        window.tableManager.refrescarTablaActual();
+    } catch (error) {
+        mostrarNotificacion(`Error al anular: ${error.message}`, 'error');
+    }
+}
+
+async function cerrarTurno(modulo, id) {
+    console.log(`Cerrar turno: ${modulo} #${id}`);
+    try {
+        // Aquí harías la llamada al API para cerrar turno
+        mostrarNotificacion(`Turno #${id} cerrado correctamente`, 'success');
+        window.tableManager.refrescarTablaActual();
+    } catch (error) {
+        mostrarNotificacion(`Error al cerrar turno: ${error.message}`, 'error');
+    }
+}
+
+// Hacer función disponible globalmente
+window.ejecutarAccion = ejecutarAccion;
 
 console.log('Botones registrados:', Object.keys(window.buttons));

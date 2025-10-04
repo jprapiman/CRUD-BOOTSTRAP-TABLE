@@ -87,5 +87,17 @@ class SQLQueries {
             'eliminar' => "UPDATE proveedores SET activo = false WHERE id = :id"
         ];
     }
+	
+	public static function ventas() {
+		return [
+			'listar' => "SELECT * FROM sp_ventas_listar()"
+		];
+	}
+
+	public static function turnos_caja() {
+		return [
+			'listar' => "SELECT * FROM sp_turnos_caja_listar()"
+		];
+	}
 }
 ?>
