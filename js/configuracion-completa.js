@@ -773,6 +773,27 @@ const CONFIGURACION_SISTEMA = {
             ]
         }
     },
+	
+	estructuraMenu: [
+		{
+			id: 'operaciones',
+			nombre: 'Operaciones',
+			icono: 'bi bi-receipt-cutoff',
+			descripcion: 'Operaciones diarias del sistema',
+			submenus: ['ventas', 'turnos_caja']
+		},
+		{
+			id: 'mantenedores',
+			nombre: 'Mantenedores',
+			icono: 'bi bi-gear-fill',
+			descripcion: 'Configuración del sistema',
+			submenus: [
+				'productos', 'categorias', 'usuarios', 'proveedores',
+				'bodegas', 'cajas', 'estados', 'tipos_documento',
+				'tipos_promocion', 'metodos_pago'
+			]
+		}
+	],
 
     // ===== ORDEN DE MÓDULOS =====
     ordenModulos: [

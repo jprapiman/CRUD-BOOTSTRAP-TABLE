@@ -198,14 +198,12 @@ generarNavbar() {
 		`;
 	}
 	// En generarAplicacionCompleta, actualizar el onclick del sidebar
-	// En generarAplicacionCompleta, actualizar el onclick del sidebar
 	generarAplicacionCompleta() {
 		return `
 			${this.generarNavbar()}
 			
-			<!-- Contenedor principal con sidebar -->
 			<div class="d-flex" id="wrapper">
-				<!-- Sidebar (solo desktop) -->
+				<!-- Sidebar -->
 				<div class="bg-white border-end d-none d-lg-block" id="sidebar-wrapper">
 					<div class="sidebar-heading border-bottom bg-light px-3 py-2">
 						<h6 class="mb-0 d-flex align-items-center">
@@ -213,7 +211,7 @@ generarNavbar() {
 							Módulos
 						</h6>
 					</div>
-					<div class="list-group list-group-flush">
+					<div class="list-group list-group-flush" id="accordionSidebar">
 						${this.generarMenuLateral()}
 					</div>
 				</div>
@@ -221,10 +219,7 @@ generarNavbar() {
 				<!-- Contenido principal -->
 				<div id="page-content-wrapper" class="w-100">
 					<div class="container-fluid p-3">
-						<!-- Área de notificaciones -->
 						<div id="notificaciones" class="fixed-notifications"></div>
-						
-						<!-- Contenido dinámico del módulo -->
 						<div id="contenido-modulo">
 							<div class="text-center py-5">
 								<i class="bi bi-speedometer2 display-1 text-primary mb-3"></i>
@@ -237,13 +232,6 @@ generarNavbar() {
 			</div>
 			
 			${this.generarFooter()}
-			
-			<script>
-				// Inicializar el menú lateral después de que se cargue el DOM
-				document.addEventListener('DOMContentLoaded', function() {
-					setTimeout(actualizarMenuLateral, 100);
-				});
-			</script>
 		`;
 	}
 
@@ -798,27 +786,67 @@ generarNavbar() {
 
 	// Generar menú lateral
 	// En generarMenuLateral, cambia el onclick:
+	// Generar menú lateral con submenús colapsables
 	generarMenuLateral() {
-		const modulos = Object.keys(this.config.modulos);
+		const estructuraMenu = this.config.estructuraMenu || [];
 		let menuHTML = '';
 		
-		modulos.forEach((modulo, index) => {
-			const moduloConfig = this.config.modulos[modulo];
-			const activeClass = index === 0 ? 'active' : '';
+		estructuraMenu.forEach((grupo, grupoIndex) => {
+			const collapseId = `submenu-${grupo.id}`;
+			const isFirstGroup = grupoIndex === 0;
 			
+			// Header del grupo con botón colapsable
 			menuHTML += `
-				<a href="#" 
-				   class="list-group-item list-group-item-action ${activeClass}" 
-				   data-modulo="${modulo}"
-				   onclick="cargarModuloMenu('${modulo}'); 
-							if(window.innerWidth < 992) { 
-								document.getElementById('sidebar-wrapper').classList.remove('show'); 
-							} 
-							return false;">
-					<i class="${moduloConfig.icono || 'bi bi-box'} me-2"></i>
-					<span>${moduloConfig.plural}</span>
+				<a href="#${collapseId}" 
+				   class="list-group-item list-group-item-action ${isFirstGroup ? '' : 'collapsed'}"
+				   data-bs-toggle="collapse" 
+				   data-bs-parent="#accordionSidebar"
+				   aria-expanded="${isFirstGroup}" 
+				   aria-controls="${collapseId}">
+					<div class="d-flex justify-content-between align-items-center">
+						<span>
+							<i class="${grupo.icono} me-2"></i>
+							<strong>${grupo.nombre}</strong>
+						</span>
+						<i class="bi bi-chevron-down"></i>
+					</div>
 				</a>
 			`;
+			
+			// Submenú colapsable con data-bs-parent
+			menuHTML += `<div class="collapse ${isFirstGroup ? 'show' : ''}" 
+							  id="${collapseId}" 
+							  data-bs-parent="#accordionSidebar">`;
+			
+			// Items del submenú
+			grupo.submenus.forEach((moduloId, itemIndex) => {
+				const moduloConfig = this.config.modulos[moduloId];
+				
+				if (!moduloConfig) {
+					console.warn(`⚠️ No se encontró configuración para: ${moduloId}`);
+					return;
+				}
+				
+				const isFirstItem = isFirstGroup && itemIndex === 0;
+				const activeClass = isFirstItem ? 'active' : '';
+				
+				menuHTML += `
+					<a href="#"
+					   class="list-group-item list-group-item-action ps-5 ${activeClass}"
+					   data-modulo="${moduloId}"
+					   data-grupo="${grupo.id}"
+					   onclick="cargarModuloMenu('${moduloId}'); 
+								if(window.innerWidth < 992) { 
+									document.getElementById('sidebar-wrapper').classList.remove('show'); 
+								} 
+								return false;">
+						<i class="${moduloConfig.icono} me-2"></i>
+						<span>${moduloConfig.plural}</span>
+					</a>
+				`;
+			});
+			
+			menuHTML += '</div>'; // Cierre del collapse
 		});
 		
 		return menuHTML;
@@ -1143,15 +1171,26 @@ function cerrarSidebarEnMovil() {
 
 // Actualizar los event listeners del menú lateral
 function actualizarMenuLateral() {
-    const menuItems = document.querySelectorAll('#sidebar-wrapper .list-group-item');
+    const menuItems = document.querySelectorAll('#sidebar-wrapper .list-group-item[data-modulo]');
     menuItems.forEach(item => {
         const modulo = item.getAttribute('data-modulo');
         item.onclick = function(e) {
             e.preventDefault();
-            cargarModuloDesdeSidebar(modulo);
+            
+            // Remover active de todos
+            menuItems.forEach(i => i.classList.remove('active'));
+            // Agregar active al clickeado
+            this.classList.add('active');
+            
+            cargarModuloMenu(modulo);
+            
+            if(window.innerWidth < 992) { 
+                document.getElementById('sidebar-wrapper').classList.remove('show'); 
+            }
         };
     });
 }
+
 // Toggle overlay del navbar
 function toggleNavbarOverlay() {
     setTimeout(() => {

@@ -203,8 +203,8 @@ body {
 
 /* Sidebar base para desktop */
 #sidebar-wrapper {
-    min-height: calc(100vh - 70px);
-    width: 280px;
+    min-height: calc(100vh - 60px);
+    width: 250px;
     transition: all 0.3s ease;
     background: white;
     border-right: 1px solid #e2e8f0;
@@ -215,7 +215,7 @@ body {
 /* Contenido principal ajustado al sidebar */
 #page-content-wrapper {
     width: 100%;
-    min-height: calc(100vh - 70px);
+    min-height: calc(100vh - 60px);
     transition: all 0.3s ease;
 }
 
@@ -232,7 +232,7 @@ body {
     
     #page-content-wrapper {
         flex-grow: 1;
-        width: calc(100% - 280px);
+        width: calc(100% - 250px);
     }
 }
 
@@ -245,9 +245,9 @@ body {
     
     #sidebar-wrapper {
         position: fixed;
-        top: 70px;
-        left: -280px;
-        height: calc(100vh - 70px);
+        top: 60px;
+        left: -250px;
+        height: calc(100vh - 60px);
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
         box-shadow: 2px 0 10px rgba(0,0,0,0.1);
@@ -264,7 +264,7 @@ body {
     #wrapper::before {
         content: '';
         position: fixed;
-        top: 70px;
+        top: 60px;
         left: 0;
         right: 0;
         bottom: 0;
@@ -305,7 +305,7 @@ body {
 
 /* Estilos del header del sidebar */
 .sidebar-heading {
-    padding: 1rem 1.25rem;
+    padding: 0.75rem 1rem;
     background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
     border-bottom: 2px solid #e2e8f0;
     font-weight: 600;
@@ -313,6 +313,9 @@ body {
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    position: sticky;
+    top: 0;
+    z-index: 10;
 }
 
 .sidebar-heading h6 {
@@ -328,125 +331,116 @@ body {
     font-size: 1.1rem;
 }
 
-/* Items del menú lateral */
+/* Lista de grupos */
 .list-group-flush {
-    padding: 0.5rem 0;
+    padding: 0;
 }
 
-.list-group-item {
-    border: none;
-    border-left: 4px solid transparent;
-    background: transparent;
-    transition: all 0.2s ease;
-    padding: 0.875rem 1.25rem;
-    margin: 0.125rem 0;
+/* Grupo colapsable - Header */
+.list-group-item[data-bs-toggle="collapse"] {
     cursor: pointer;
+    user-select: none;
+    background: #f8f9fa;
+    border: none;
+    border-bottom: 1px solid #e9ecef;
+    padding: 0.75rem 1rem;
+    transition: all 0.2s ease;
+    font-weight: 600;
+    color: #1e293b;
+    text-decoration: none;
+}
+
+.list-group-item[data-bs-toggle="collapse"]:hover {
+    background: #e9ecef;
+}
+
+.list-group-item[data-bs-toggle="collapse"] .d-flex {
+    width: 100%;
+}
+
+.list-group-item[data-bs-toggle="collapse"] span {
+    display: flex;
+    align-items: center;
+}
+
+.list-group-item[data-bs-toggle="collapse"] i.me-2 {
+    color: var(--color-primary);
+    font-size: 1.1rem;
+}
+
+/* Chevron animado */
+.list-group-item[data-bs-toggle="collapse"] .bi-chevron-down {
+    transition: transform 0.3s ease;
+    font-size: 0.875rem;
+    color: #64748b;
+}
+
+.list-group-item[data-bs-toggle="collapse"]:not(.collapsed) .bi-chevron-down {
+    transform: rotate(180deg);
+}
+
+/* Área del collapse */
+.list-group-flush .collapse {
+    background: white;
+}
+
+.list-group-flush .collapsing {
+    transition: height 0.35s ease;
+}
+
+/* Items del submenú */
+.list-group-item.ps-5 {
+    padding: 0.625rem 1rem 0.625rem 2.5rem;
+    background: white;
+    border: none;
+    border-left: 3px solid transparent;
+    transition: all 0.2s ease;
     color: #475569;
+    font-size: 0.9rem;
     text-decoration: none;
     display: flex;
     align-items: center;
-    gap: 0.75rem;
 }
 
-.list-group-item:hover {
+.list-group-item.ps-5:hover {
     background: linear-gradient(90deg, rgba(102, 126, 234, 0.08) 0%, rgba(102, 126, 234, 0.02) 100%);
     border-left-color: var(--color-primary);
-    transform: translateX(4px);
+    transform: translateX(2px);
     color: var(--color-primary);
 }
 
-.list-group-item.active {
+.list-group-item.ps-5.active {
     background: linear-gradient(90deg, rgba(102, 126, 234, 0.15) 0%, rgba(102, 126, 234, 0.05) 100%);
     border-left-color: var(--color-primary);
     color: var(--color-primary);
     font-weight: 600;
-    box-shadow: inset 0 0 0 1px rgba(102, 126, 234, 0.1);
 }
 
-.list-group-item i {
+.list-group-item.ps-5 i {
     width: 24px;
     height: 24px;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.1rem;
+    font-size: 1rem;
     transition: transform 0.2s ease;
 }
 
-.list-group-item:hover i {
+.list-group-item.ps-5:hover i {
     transform: scale(1.1);
 }
 
-.list-group-item.active i {
+.list-group-item.ps-5.active i {
     animation: pulse 2s infinite;
 }
 
-.list-group-item span {
+.list-group-item.ps-5 span {
     flex: 1;
-    font-size: 0.95rem;
 }
 
-/* Botón toggle para móvil (si se necesita) */
-.sidebar-toggle {
-    display: none;
-    position: fixed;
-    bottom: 20px;
-    left: 20px;
-    z-index: 1046;
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    background: var(--gradient-primary);
-    color: white;
-    border: none;
-    box-shadow: var(--box-shadow-lg);
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-@media (max-width: 991.98px) {
-    .sidebar-toggle {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    
-    .sidebar-toggle:hover {
-        transform: scale(1.1);
-        box-shadow: var(--box-shadow-xl);
-    }
-    
-    .sidebar-toggle i {
-        font-size: 1.5rem;
-    }
-}
-
-/* Animación del sidebar en móvil */
-@media (max-width: 991.98px) {
-    #sidebar-wrapper {
-        animation-duration: 0.3s;
-        animation-timing-function: ease-out;
-    }
-    
-    #sidebar-wrapper.show {
-        animation-name: slideInLeft;
-    }
-    
-    @keyframes slideInLeft {
-        from {
-            transform: translateX(-100%);
-            opacity: 0;
-        }
-        to {
-            transform: translateX(0);
-            opacity: 1;
-        }
-    }
-}
-
-/* Mejoras visuales adicionales */
-#sidebar-wrapper {
-    box-shadow: 2px 0 4px rgba(0, 0, 0, 0.02);
+/* Separador entre grupos */
+.collapse + .list-group-item[data-bs-toggle="collapse"] {
+    margin-top: 1px;
 }
 
 /* Divider entre items (opcional) */
@@ -528,6 +522,54 @@ body {
 #sidebar-wrapper .list-group-item,
 #page-content-wrapper {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Animación del sidebar en móvil */
+@media (max-width: 991.98px) {
+    #sidebar-wrapper {
+        animation-duration: 0.3s;
+        animation-timing-function: ease-out;
+    }
+    
+    #sidebar-wrapper.show {
+        animation-name: slideInLeft;
+    }
+    
+    @keyframes slideInLeft {
+        from {
+            transform: translateX(-100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+}
+
+/* Mejoras visuales adicionales */
+#sidebar-wrapper {
+    box-shadow: 2px 0 4px rgba(0, 0, 0, 0.02);
+}
+
+/* Scrollbar personalizado para desktop */
+@media (min-width: 992px) {
+    #sidebar-wrapper::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    #sidebar-wrapper::-webkit-scrollbar-track {
+        background: #f1f5f9;
+    }
+    
+    #sidebar-wrapper::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 3px;
+    }
+    
+    #sidebar-wrapper::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+    }
 }
 
 /* ========================================
@@ -1754,4 +1796,61 @@ body {
 
 .list-group-flush .list-group-item:last-child {
     padding-bottom: 0.5rem;
+}
+
+/* ========================================
+   MENÚ LATERAL CON SUBMENÚS
+   ======================================== */
+
+/* Animación del chevron */
+.list-group-item[data-bs-toggle="collapse"] i.bi-chevron-down {
+    transition: transform 0.3s ease;
+}
+
+.list-group-item[data-bs-toggle="collapse"][aria-expanded="true"] i.bi-chevron-down {
+    transform: rotate(180deg);
+}
+
+/* Estilo del header del grupo */
+.list-group-item.bg-light {
+    background-color: #f8f9fa !important;
+    font-weight: 600;
+    cursor: pointer;
+    user-select: none;
+}
+
+.list-group-item.bg-light:hover {
+    background-color: #e9ecef !important;
+}
+
+/* Estilo de los items del submenú */
+.list-group-item.ps-5 {
+    padding-left: 3rem !important;
+    background-color: white;
+    border-left: 3px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.list-group-item.ps-5:hover {
+    background-color: rgba(102, 126, 234, 0.05);
+    border-left-color: var(--color-primary);
+    transform: translateX(2px);
+}
+
+.list-group-item.ps-5.active {
+    background-color: rgba(102, 126, 234, 0.1);
+    border-left-color: var(--color-primary);
+    color: var(--color-primary);
+    font-weight: 600;
+}
+
+/* Animación suave del collapse */
+.collapse {
+    transition: height 0.3s ease;
+}
+
+/* Borde entre grupos */
+.list-group-item.bg-light + .collapse {
+    border-bottom: 1px solid #e9ecef;
+}
 }
