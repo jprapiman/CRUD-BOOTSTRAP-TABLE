@@ -25,7 +25,7 @@ class ConfigValidaciones {
             
             // Validar configuración crítica
             if (!moduloConfig.columnasFormulario || moduloConfig.columnasFormulario.length === 0) {
-                errores.push(`Módulo ${modulo} no tiene columnasFormulario configuradas`);
+                advertencias.push(`Módulo ${modulo} no tiene columnasFormulario configuradas`);
             }
             
             if (!moduloConfig.columnasTablas || moduloConfig.columnasTablas.length === 0) {

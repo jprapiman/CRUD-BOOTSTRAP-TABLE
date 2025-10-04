@@ -1904,4 +1904,49 @@ body {
 .list-group-item.bg-light + .collapse {
     border-bottom: 1px solid #e9ecef;
 }
+
+/* Submenú colapsable personalizado */
+.submenu-collapse {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+}
+
+.submenu-collapse.show {
+    max-height: 1000px;
+    transition: max-height 0.5s ease;
+}
+
+/* Header del grupo */
+.list-group-item[onclick*="toggleSubmenu"] {
+    cursor: pointer;
+    user-select: none;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+    padding: 0.75rem 1rem;
+    transition: all 0.2s ease;
+    font-weight: 600;
+    color: #1e293b;
+    text-align: left;
+    width: 100%;
+}
+
+.list-group-item[onclick*="toggleSubmenu"]:hover {
+    background: #e9ecef;
+}
+
+.list-group-item[onclick*="toggleSubmenu"]:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+/* Chevron animado */
+.list-group-item[onclick*="toggleSubmenu"] .bi-chevron-down {
+    transition: transform 0.3s ease;
+    font-size: 0.875rem;
+    color: #64748b;
+}
+
+.list-group-item[onclick*="toggleSubmenu"]:not(.collapsed) .bi-chevron-down {
+    transform: rotate(180deg);
 }

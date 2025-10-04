@@ -205,7 +205,7 @@ generarNavbar() {
 			<div class="d-flex" id="wrapper">
 				<!-- Sidebar -->
 				<div class="bg-white border-end d-none d-lg-block" id="sidebar-wrapper">
-					<div class="accordion accordion-flush" id="accordionSidebar">
+					<div class="list-group list-group-flush">
 						${this.generarMenuLateral()}
 					</div>
 				</div>
@@ -783,33 +783,30 @@ generarNavbar() {
 			const collapseId = `submenu-${grupo.id}`;
 			const isFirstGroup = grupoIndex === 0;
 			
-			// Header del grupo con data-bs-parent
+			// Header del grupo
 			menuHTML += `
-				<div class="accordion-item border-0">
-					<h2 class="accordion-header">
-						<button class="list-group-item list-group-item-action ${isFirstGroup ? '' : 'collapsed'}"
-								type="button"
-								data-bs-toggle="collapse"
-								data-bs-target="#${collapseId}"
-								aria-expanded="${isFirstGroup}"
-								aria-controls="${collapseId}">
-							<div class="d-flex justify-content-between align-items-center">
-								<span>
-									<i class="${grupo.icono} me-2"></i>
-									<strong>${grupo.nombre}</strong>
-								</span>
-								<i class="bi bi-chevron-down"></i>
-							</div>
-						</button>
-					</h2>
-					
-					<div class="accordion-collapse collapse ${isFirstGroup ? 'show' : ''}" 
-						 id="${collapseId}"
-						 data-bs-parent="#accordionSidebar">
-						<div class="accordion-body p-0">
+				<button class="list-group-item list-group-item-action border-0 ${isFirstGroup ? '' : 'collapsed'}"
+						type="button"
+						onclick="toggleSubmenu('${collapseId}', this)"
+						aria-expanded="${isFirstGroup}"
+						aria-controls="${collapseId}">
+					<div class="d-flex justify-content-between align-items-center">
+						<span>
+							<i class="${grupo.icono} me-2"></i>
+							<strong>${grupo.nombre}</strong>
+						</span>
+						<i class="bi bi-chevron-down"></i>
+					</div>
+				</button>
 			`;
 			
-			// Items del submenú
+			// Submenú
+			menuHTML += `
+				<div class="submenu-collapse ${isFirstGroup ? 'show' : ''}" 
+					 id="${collapseId}">
+			`;
+			
+			// Items del submenú - AGREGAR cerrarOtrosMenus
 			grupo.submenus.forEach((moduloId, itemIndex) => {
 				const moduloConfig = this.config.modulos[moduloId];
 				
@@ -823,10 +820,11 @@ generarNavbar() {
 				
 				menuHTML += `
 					<a href="#"
-					   class="list-group-item list-group-item-action ps-5 ${activeClass}"
+					   class="list-group-item list-group-item-action ps-5 border-0 ${activeClass}"
 					   data-modulo="${moduloId}"
 					   data-grupo="${grupo.id}"
-					   onclick="cargarModuloMenu('${moduloId}'); 
+					   onclick="cerrarOtrosMenus('${grupo.id}'); 
+								cargarModuloMenu('${moduloId}'); 
 								if(window.innerWidth < 992) { 
 									document.getElementById('sidebar-wrapper').classList.remove('show'); 
 								} 
@@ -837,11 +835,7 @@ generarNavbar() {
 				`;
 			});
 			
-			menuHTML += `
-						</div>
-					</div>
-				</div>
-			`;
+			menuHTML += '</div>';
 		});
 		
 		return menuHTML;
@@ -1252,3 +1246,40 @@ $.extend($.fn.bootstrapTable.defaults, {
     buttonsClass: 'primary',
     iconsPrefix: 'bi'
 });
+
+// Función para manejar el toggle de submenús
+function toggleSubmenu(targetId, button) {
+    const target = document.getElementById(targetId);
+    
+    // Solo toggle el menú actual, sin cerrar los otros
+    target.classList.toggle('show');
+    button.classList.toggle('collapsed');
+    const isExpanded = target.classList.contains('show');
+    button.setAttribute('aria-expanded', isExpanded);
+}
+
+// Hacer disponible globalmente
+window.toggleSubmenu = toggleSubmenu;
+
+// Función para cerrar otros menús al seleccionar un item
+function cerrarOtrosMenus(grupoActual) {
+    const allSubmenus = document.querySelectorAll('.submenu-collapse');
+    const allButtons = document.querySelectorAll('.list-group-item[onclick*="toggleSubmenu"]');
+    
+    allSubmenus.forEach(submenu => {
+        // Cerrar todos los menús excepto el del grupo actual
+        if (submenu.id !== `submenu-${grupoActual}`) {
+            submenu.classList.remove('show');
+        }
+    });
+    
+    allButtons.forEach(btn => {
+        const btnId = btn.getAttribute('aria-controls');
+        if (btnId !== `submenu-${grupoActual}`) {
+            btn.classList.add('collapsed');
+            btn.setAttribute('aria-expanded', 'false');
+        }
+    });
+}
+
+window.cerrarOtrosMenus = cerrarOtrosMenus;

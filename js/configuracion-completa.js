@@ -776,10 +776,10 @@ const CONFIGURACION_SISTEMA = {
 	
 	estructuraMenu: [
 		{
-			id: 'operaciones',
-			nombre: 'Operaciones',
+			id: 'transacciones',
+			nombre: 'Transacciones',
 			icono: 'bi bi-receipt-cutoff',
-			descripcion: 'Operaciones diarias del sistema',
+        descripcion: 'Operaciones diarias del sistema',
 			submenus: ['ventas', 'turnos_caja']
 		},
 		{
